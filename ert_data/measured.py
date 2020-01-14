@@ -4,9 +4,9 @@ from ert_data import loader
 
 
 class MeasuredData(object):
-    def __init__(self, facade, keys, index_lists=None):
+    def __init__(self, facade, keys, index_lists=None, case_name=None):
         self._facade = facade
-        self._set_data(self._get_data(keys, index_lists))
+        self._set_data(self._get_data(keys, index_lists, case_name))
 
     @property
     def data(self):
@@ -59,14 +59,15 @@ class MeasuredData(object):
     def is_empty(self):
         return self.data.empty
 
-    def _get_data(self, observation_keys, index_lists):
+    def _get_data(self, observation_keys, index_lists, case_name):
         """
         Adds simulated and observed data and returns a dataframe where ensamble
         members will have a data key, observed data will be named OBS and
         observed standard deviation will be named STD.
         """
         measured_data = pd.DataFrame()
-        case_name = self._facade.get_current_case_name()
+        if case_name is None:
+            case_name = self._facade.get_current_case_name()
 
         if index_lists is None:
             index_lists = [None] * len(observation_keys)
