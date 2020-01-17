@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT
 
 from ert_gui.ertwidgets import resourceIcon
+from ert_gui.tools.plot.gui_api import GuiApi
 
 
 class CustomNavigationToolbar(NavigationToolbar2QT):
@@ -35,13 +36,12 @@ class CustomNavigationToolbar(NavigationToolbar2QT):
 class PlotWidget(QWidget):
     customizationTriggered = Signal()
 
-    def __init__(self, name, plotFunction, plot_condition_function_list, plotContextFunction, parent=None):
+    def __init__(self, name, plotter, plotContextFunction, parent=None):
         QWidget.__init__(self, parent)
 
         self._name = name
-        self._plotFunction = plotFunction
+        self._plotter = plotter
         self._plotContextFunction = plotContextFunction
-        self._plot_conditions = plot_condition_function_list
         """:type: list of functions """
 
         self._figure = Figure()
@@ -109,4 +109,5 @@ class PlotWidget(QWidget):
         return self._active
 
     def canPlotKey(self, key):
-        return any([plotConditionFunction(key) for plotConditionFunction in self._plot_conditions])
+        api = GuiApi()
+        return api.dimentionalityOfKey(key) == self.plotter.dimentionality
