@@ -6,8 +6,8 @@ from .plot_tools import PlotTools
 
 class EnsemblePlot:
 
-    def __init__(self):
-        self._api = GuiApi()
+    def __init__(self, api):
+        self._api = api
         self.dimentionality = 2
 
     def plot(self, plot_context):

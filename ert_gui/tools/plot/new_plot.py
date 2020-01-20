@@ -2,6 +2,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMainWindow, QDockWidget, QTabWidget, QWidget, QVBoxLayout
 
 from ert_gui.plottery.plots.ensemble import EnsemblePlot
+from ert_gui.plottery.plots.statistics import StatisticsPlot
 from ert_shared import ERT
 from ert_gui.ertwidgets import showWaitCursorWhileWaiting
 from ert_gui.ertwidgets.models.ertmodel import getCurrentCaseName
@@ -56,8 +57,8 @@ class NewPlotWindow(QMainWindow):
         self._plot_widgets = []
         """:type: list of PlotWidget"""
 
-        self.addPlotWidget(ENSEMBLE, EnsemblePlot())
-        # self.addPlotWidget(STATISTICS, plots.plotStatistics, 2)
+        self.addPlotWidget(ENSEMBLE, EnsemblePlot(self._api))
+        self.addPlotWidget(STATISTICS, StatisticsPlot(self._api))
         # self.addPlotWidget(HISTOGRAM, plots.plotHistogram, 1)
         # self.addPlotWidget(GAUSSIAN_KDE, plots.plotGaussianKDE, 1)
         # self.addPlotWidget(DISTRIBUTION, plots.plotDistribution, 1)
@@ -163,6 +164,8 @@ class NewPlotWindow(QMainWindow):
         for plot_widget in self._plot_widgets:
             if plot_widget.canPlotKey(key):
                 plot_widget.updatePlot()
+
+        self.currentPlotChanged()
 
 
     def toggleCustomizeDialog(self):
