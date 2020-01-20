@@ -1,15 +1,13 @@
 import math
 
-def plotObservations(plot_context, axes):
-    ert = plot_context.ert()
+def plotObservations(api, plot_context, axes):
     key = plot_context.key()
     config = plot_context.plotConfig()
     case_list = plot_context.cases()
-    data_gatherer = plot_context.dataGatherer()
 
-    if config.isObservationsEnabled() and data_gatherer.hasObservationGatherFunction():
+    if config.isObservationsEnabled() and api.isKeyWithObservations(key):
         if len(case_list) > 0:
-            observation_data = data_gatherer.gatherObservationData(ert, case_list[0], key)
+            observation_data = api.gatherObservationData(case_list[0], key)
 
             if not observation_data.empty:
                 _plotObservations(axes, config, observation_data, value_column=key)

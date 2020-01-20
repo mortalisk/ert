@@ -10,11 +10,10 @@ class EnsemblePlot:
         self._api = GuiApi()
         self.dimentionality = 2
 
-    def plotEnsemble(self, plot_context):
+    def plot(self, plot_context):
         """
         @type plot_context: ert_gui.plottery.PlotContext
         """
-        ert = plot_context.ert()
         key = plot_context.key()
         config = plot_context.plotConfig()
         """:type: ert_gui.plottery.PlotConfig """
@@ -27,7 +26,7 @@ class EnsemblePlot:
         plot_context.x_axis = plot_context.DATE_AXIS
 
         for case in case_list:
-            data = plot_context.dataGatherer().gatherData(ert, case, key)
+            data = self._api.dataForKey(case, key)
             if not data.empty:
                 if not data.index.is_all_dates:
                     plot_context.deactivateDateSupport()
@@ -36,9 +35,9 @@ class EnsemblePlot:
                 self._plotLines(axes, config, data, case, plot_context.isDateSupportActive())
                 config.nextColor()
 
-        plotRefcase(plot_context, axes)
-        plotObservations(plot_context, axes)
-        plotHistory(plot_context, axes)
+        #plotRefcase(plot_context, axes)
+        plotObservations(self._api, plot_context, axes)
+        #plotHistory(plot_context, axes)
 
         default_x_label = "Date" if plot_context.isDateSupportActive() else "Index"
         PlotTools.finalizePlot(plot_context, axes, default_x_label=default_x_label, default_y_label="Value")

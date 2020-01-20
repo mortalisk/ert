@@ -82,7 +82,7 @@ class PlotWidget(QWidget):
             self.resetPlot()
             plot_context = self._plotContextFunction(self.getFigure())
             try:
-                self._plotFunction(plot_context)
+                self._plotter.plot(plot_context)
                 self._canvas.draw()
             except Exception as e:
                 exc_type, exc_value, exc_tb = sys.exc_info()
@@ -110,4 +110,4 @@ class PlotWidget(QWidget):
 
     def canPlotKey(self, key):
         api = GuiApi()
-        return api.dimentionalityOfKey(key) == self.plotter.dimentionality
+        return api.dimentionalityOfKey(key) == self._plotter.dimentionality

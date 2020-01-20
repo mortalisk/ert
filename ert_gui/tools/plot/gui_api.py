@@ -12,11 +12,38 @@ class GuiApi:
 
         self._key_manager = self._ert.getKeyManager()
 
+    def gatherObservationData(self, case, key):
+        if self.isSummaryKey(key):
+            return self.gatherSummaryObservationData(case, key)
+        elif self.isGenDataKey(key):
+            return self.gatherGenDataObservationData(case, key)
+        else:
+            raise ValueError("No observations for key: " + key)
+
+    def isKeyWithObservations(self, key):
+        return self._key_manager.isKeyWithObservations(key)
+
+    def keyIndexType(self, key):
+        if self._key_manager.isGenDataKey(key):
+            return "INDEX"
+        elif self._key_manager.isSummaryKey(key):
+            return "VALUE"
+        else:
+            return None
+
     def dataForKey(self, case, key):
-        pass
+        if self.isSummaryKey(key):
+            return self.gatherSummaryData(case, key)
+        elif self.isGenKwKey(key):
+            return self.gatherGenKwData(case, key)
+        elif self.isCustomKwKey(key):
+            return self.gatherCustomKwData(case, key)
+        elif self.isGenDataKey(key):
+            return self.gatherGenDataData(case, key)
 
     def allDataTypeKeys(self):
-        self._key_manager.allDataTypeKeys()
+        return self._key_manager.allDataTypeKeys()
+
 
     def gatherGenKwData(self, case, key):
         """ :rtype: pandas.DataFrame """
@@ -76,8 +103,8 @@ class GuiApi:
 
     def gatherGenDataData(self, case, key):
         """ :rtype: pandas.DataFrame """
-        key, report_step = key.split("@", 1)
-        report_step = int(report_step)
+        key = key.split("@")[0]
+        report_step = 0
         try:
             data = GenDataCollector.loadGenData(self._ert, case, key, report_step)
         except ValueError:
@@ -87,8 +114,8 @@ class GuiApi:
 
     def gatherGenDataObservationData(self, case, key_with_report_step):
         """ :rtype: pandas.DataFrame """
-        key, report_step = key_with_report_step.split("@", 1)
-        report_step = int(report_step)
+        key = key_with_report_step.split("@")[0]
+        report_step = 0
 
         obs_key = GenDataObservationCollector.getObservationKeyForDataKey(self._ert, key, report_step)
 
@@ -131,3 +158,10 @@ class GuiApi:
     def isMisfitKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.misfitKeys()
+
+    def dimentionalityOfKey(self, key):
+        if self.isSummaryKey(key) or self.isGenDataKey(key):
+            return 2
+        else:
+            return 1
+

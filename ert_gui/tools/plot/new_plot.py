@@ -36,7 +36,7 @@ class NewPlotWindow(QMainWindow):
         self._plot_customizer = PlotCustomizer(self)
 
         def plotConfigCreator(key):
-            return PlotConfigFactory.createPlotConfigForKey(self._ert, key)
+            return PlotConfigFactory.createPlotConfigForKey(self._api, key)
 
         self._plot_customizer.setPlotConfigCreator(plotConfigCreator)
         self._plot_customizer.settingsChanged.connect(self.keySelected)
@@ -56,14 +56,12 @@ class NewPlotWindow(QMainWindow):
         self._plot_widgets = []
         """:type: list of PlotWidget"""
 
-
         self.addPlotWidget(ENSEMBLE, EnsemblePlot())
         # self.addPlotWidget(STATISTICS, plots.plotStatistics, 2)
         # self.addPlotWidget(HISTOGRAM, plots.plotHistogram, 1)
         # self.addPlotWidget(GAUSSIAN_KDE, plots.plotGaussianKDE, 1)
         # self.addPlotWidget(DISTRIBUTION, plots.plotDistribution, 1)
         # self.addPlotWidget(CROSS_CASE_STATISTICS, plots.plotCrossCaseStatistics, 1)
-
 
         data_types_key_model = DataTypeKeysListModel(self._api)
 
@@ -95,14 +93,8 @@ class NewPlotWindow(QMainWindow):
     def _updateCustomizer(self, plot_widget):
         """ @type plot_widget: PlotWidget """
         key = self.getSelectedKey()
-        key_manager = self._ert.getKeyManager()
+        index_type = self._api.keyIndexType(key)
 
-        index_type = PlotContext.UNKNOWN_AXIS
-
-        if key_manager.isGenDataKey(key):
-            index_type = PlotContext.INDEX_AXIS
-        elif key_manager.isSummaryKey(key):
-            index_type = PlotContext.DATE_AXIS
 
         x_axis_type = PlotContext.UNKNOWN_AXIS
         y_axis_type = PlotContext.UNKNOWN_AXIS
@@ -130,20 +122,16 @@ class NewPlotWindow(QMainWindow):
     def createPlotContext(self, figure):
         key = self.getSelectedKey()
         cases = self._case_selection_widget.getPlotCaseNames()
-        data_gatherer = self.getDataGathererForKey(key)
         plot_config = PlotConfig.createCopy(self._plot_customizer.getPlotConfig())
         plot_config.setTitle(key)
-        return PlotContext(self._ert, figure, plot_config, cases, key, data_gatherer)
+        return PlotContext(figure, plot_config, cases, key)
 
-    def getDataGathererForKey(self, key):
-        """ @rtype: PlotDataGatherer """
-        return next((data_gatherer for data_gatherer in self._data_gatherers if data_gatherer.canGatherDataForKey(key)), None)
 
     def getSelectedKey(self):
         return str(self._data_type_keys_widget.getSelectedItem())
 
-    def addPlotWidget(self, name, plotFunction, enabled=True):
-        plot_widget = PlotWidget(name, plotFunction, self.createPlotContext)
+    def addPlotWidget(self, name, plotter, enabled=True):
+        plot_widget = PlotWidget(name, plotter, self.createPlotContext)
         plot_widget.customizationTriggered.connect(self.toggleCustomizeDialog)
 
         index = self._central_tab.addTab(plot_widget, name)

@@ -11,13 +11,11 @@ class PlotContext(object):
     DEPTH_AXIS = "DEPTH"
     AXIS_TYPES = [UNKNOWN_AXIS, COUNT_AXIS, DATE_AXIS, DENSITY_AXIS, DEPTH_AXIS, INDEX_AXIS, VALUE_AXIS]
 
-    def __init__(self, ert, figure, plot_config, cases, key, data_gatherer):
+    def __init__(self, figure, plot_config, cases, key):
         super(PlotContext, self).__init__()
-        self._data_gatherer = data_gatherer
         self._key = key
         self._cases = cases
         self._figure = figure
-        self._ert = ert
         self._plot_config = plot_config
 
         self._date_support_active = True
@@ -32,10 +30,6 @@ class PlotContext(object):
         """ :rtype: PlotConfig """
         return self._plot_config
 
-    def ert(self):
-        """ :rtype: res.enkf.EnKFMain"""
-        return self._ert
-
     def cases(self):
         """ :rtype: list of str """
         return self._cases
@@ -43,10 +37,6 @@ class PlotContext(object):
     def key(self):
         """ :rtype: str """
         return self._key
-
-    def dataGatherer(self):
-        """ :rtype: PlotDataGatherer """
-        return self._data_gatherer
 
     def deactivateDateSupport(self):
         self._date_support_active = False
