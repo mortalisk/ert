@@ -4,7 +4,7 @@ from qtpy.QtWidgets import QDialog, QVBoxLayout, QLayout, QTabWidget, QHBoxLayou
 from ert_shared import ERT
 from ert_gui.tools.plot.widgets import CopyStyleToDialog
 from ert_gui.ertwidgets import resourceIcon
-from ert_gui.plottery import PlotConfig, PlotConfigHistory
+from ert_gui.plottery import PlotConfig, PlotConfigHistory, PlotConfigFactory
 from ert_gui.tools.plot.customize import DefaultCustomizationView, StyleCustomizationView, \
     StatisticsCustomizationView, LimitsCustomizationView
 
@@ -24,8 +24,6 @@ class PlotCustomizer(QObject):
                 "No_Key_Selected",
                 PlotConfig(plot_settings=default_plot_settings, title=None))
         }
-
-        self._plotConfigCreator = self._defaultPlotConfigCreator
 
         self._customization_dialog = CustomizePlotDialog("Customize", parent, key=self._plot_config_key)
 
@@ -130,16 +128,11 @@ class PlotCustomizer(QObject):
         else:
             self._customization_dialog.show()
 
-    def _defaultPlotConfigCreator(self, title):
-        return PlotConfig(title)
-
-    def _selectiveCopyOfCurrentPlotConfig(self, title):
-        return self._plotConfigCreator(title)
-
-    def switchPlotConfigHistory(self, key):
+    def switchPlotConfigHistory(self, key_def):
+        key = key_def["key"]
         if key != self._plot_config_key:
             if not key in self._plot_configs:
-                self._plot_configs[key] = PlotConfigHistory(key, self._selectiveCopyOfCurrentPlotConfig(key))
+                self._plot_configs[key] = PlotConfigHistory(key, PlotConfigFactory.createPlotConfigForKey(key_def))
                 self._customization_dialog.addCopyableKey(key)
             self._customization_dialog.currentPlotKeyChanged(key)
             self._previous_key = self._plot_config_key
@@ -152,9 +145,6 @@ class PlotCustomizer(QObject):
 
     def setAxisTypes(self, x_axis_type, y_axis_type):
         self._customize_limits.setAxisTypes(x_axis_type, y_axis_type)
-
-    def setPlotConfigCreator(self, func):
-        self._plotConfigCreator = func
 
 
 class CustomizePlotDialog(QDialog):

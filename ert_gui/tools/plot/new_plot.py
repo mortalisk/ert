@@ -36,10 +36,6 @@ class NewPlotWindow(QMainWindow):
 
         self._plot_customizer = PlotCustomizer(self)
 
-        def plotConfigCreator(key):
-            return PlotConfigFactory.createPlotConfigForKey(self._api, key)
-
-        self._plot_customizer.setPlotConfigCreator(plotConfigCreator)
         self._plot_customizer.settingsChanged.connect(self.keySelected)
 
         self._central_tab = QTabWidget()
@@ -64,7 +60,9 @@ class NewPlotWindow(QMainWindow):
         # self.addPlotWidget(DISTRIBUTION, plots.plotDistribution, 1)
         # self.addPlotWidget(CROSS_CASE_STATISTICS, plots.plotCrossCaseStatistics, 1)
 
-        data_types_key_model = DataTypeKeysListModel(self._api.allDataTypeKeys())
+        self._key_definitions = self._api.allDataTypeKeys()
+
+        data_types_key_model = DataTypeKeysListModel(self._key_definitions)
 
         self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model)
         self._data_type_keys_widget.dataTypeKeySelected.connect(self.keySelected)
@@ -154,12 +152,13 @@ class NewPlotWindow(QMainWindow):
     @showWaitCursorWhileWaiting
     def keySelected(self):
         key = self.getSelectedKey()
-        self._plot_customizer.switchPlotConfigHistory(key)
+        key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
+        self._plot_customizer.switchPlotConfigHistory(key_def)
 
         for plot_widget in self._plot_widgets:
             plot_widget.setDirty()
             index = self._central_tab.indexOf(plot_widget)
-            self._central_tab.setTabEnabled(index, plot_widget.canPlotKey(key))
+            self._central_tab.setTabEnabled(index, plot_widget._plotter.dimentionality == key_def["dimentionality"])
 
         for plot_widget in self._plot_widgets:
             if plot_widget.canPlotKey(key):
