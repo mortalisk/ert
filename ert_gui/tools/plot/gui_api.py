@@ -8,17 +8,17 @@ from res.enkf.export import GenKwCollector, SummaryCollector, GenDataCollector, 
 
 class GuiApi:
 
-    def __init__(self):
-        self._ert = ERT.ert
+    def __init__(self, ert):
+        self._ert = ert
         """:type: res.enkf.enkf_main.EnKFMain"""
 
         self._key_manager = self._ert.getKeyManager()
 
     def allDataTypeKeys(self):
         return [{"key": key,
-                 "indexType": self.keyIndexType(key),
-                 "observations": self.observationKeys(key),
-                 "dimentionality": self.dimentionalityOfKey(key)}
+                 "index_type": self._keyIndexType(key),
+                 "has_observations": self._isKeyWithObservations(key),
+                 "dimentionality": self._dimentionalityOfKey(key)}
                 for key in self._key_manager.allDataTypeKeys()]
 
     def getAllCasesNotRunning(self):
@@ -32,27 +32,29 @@ class GuiApi:
                 if not fs.isCaseRunning(case)]
 
     def dataForKey(self, case, key):
-        if self.isSummaryKey(key):
-            return self.gatherSummaryData(case, key)
-        elif self.isGenKwKey(key):
-            return self.gatherGenKwData(case, key)
-        elif self.isCustomKwKey(key):
-            return self.gatherCustomKwData(case, key)
-        elif self.isGenDataKey(key):
-            return self.gatherGenDataData(case, key)
+        if self._isSummaryKey(key):
+            return self._gatherSummaryData(case, key)
+        elif self._isGenKwKey(key):
+            return self._gatherGenKwData(case, key)
+        elif self._isCustomKwKey(key):
+            return self._gatherCustomKwData(case, key)
+        elif self._isGenDataKey(key):
+            return self._gatherGenDataData(case, key)
 
-    def observationData(self, case, key):
-        if self.isSummaryKey(key):
-            return self.gatherSummaryObservationData(case, key)
-        elif self.isGenDataKey(key):
-            return self.gatherGenDataObservationData(case, key)
+    def observationForDataKey(self, case, key):
+        if self._isSummaryKey(key):
+            return self._gatherSummaryObservationData(case, key)
+        elif self._isGenDataKey(key):
+            return self._gatherGenDataObservationData(case, key)
         else:
-            raise ValueError("No observations for key: " + key)
+            return None
 
-    def isKeyWithObservations(self, key):
+    # private methods:
+
+    def _isKeyWithObservations(self, key):
         return self._key_manager.isKeyWithObservations(key)
 
-    def observationKeys(self, key):
+    def _observationKeys(self, key):
         if self._key_manager.isGenDataKey(key):
             return [GenDataObservationCollector.getObservationKeyForDataKey(self._ert, key, 0)]
         elif self._key_manager.isSummaryKey(key):
@@ -60,7 +62,7 @@ class GuiApi:
         else:
             return []
 
-    def keyIndexType(self, key):
+    def _keyIndexType(self, key):
         if self._key_manager.isGenDataKey(key):
             return "INDEX"
         elif self._key_manager.isSummaryKey(key):
@@ -69,12 +71,12 @@ class GuiApi:
             return None
 
 
-    def gatherGenKwData(self, case, key):
+    def _gatherGenKwData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = GenKwCollector.loadAllGenKwData(self._ert, case, [key])
         return data[key].dropna()
 
-    def gatherSummaryData(self, case, key):
+    def _gatherSummaryData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = SummaryCollector.loadAllSummaryData(self._ert, case, [key])
         if not data.empty:
@@ -91,7 +93,7 @@ class GuiApi:
 
         return data #.dropna()
 
-    def gatherSummaryRefcaseData(self, key):
+    def _gatherSummaryRefcaseData(self, key):
         refcase = self._ert.eclConfig().getRefcase()
 
         if refcase is None or key not in refcase:
@@ -105,7 +107,7 @@ class GuiApi:
 
         return data.iloc[1:]
 
-    def gatherSummaryHistoryData(self, case, key):
+    def _gatherSummaryHistoryData(self, case, key):
         # create history key
         if ":" in key:
             head, tail = key.split(":", 2)
@@ -120,13 +122,13 @@ class GuiApi:
         return data
 
 
-    def gatherSummaryObservationData(self, case, key):
+    def _gatherSummaryObservationData(self, case, key):
         if self._ert.getKeyManager().isKeyWithObservations(key):
             return SummaryObservationCollector.loadObservationData(self._ert, case, [key]).dropna()
         else:
             return DataFrame()
 
-    def gatherGenDataData(self, case, key):
+    def _gatherGenDataData(self, case, key):
         """ :rtype: pandas.DataFrame """
         key = key.split("@")[0]
         report_step = 0
@@ -137,7 +139,7 @@ class GuiApi:
 
         return data.dropna() # removes all rows that has a NaN
 
-    def gatherGenDataObservationData(self, case, key_with_report_step):
+    def _gatherGenDataObservationData(self, case, key_with_report_step):
         """ :rtype: pandas.DataFrame """
         key = key_with_report_step.split("@")[0]
         report_step = 0
@@ -153,39 +155,39 @@ class GuiApi:
 
         return obs_data.dropna()
 
-    def gatherCustomKwData(self, case, key):
+    def _gatherCustomKwData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = CustomKWCollector.loadAllCustomKWData(self._ert, case, [key])[key]
 
         return data
 
 
-    def isKeyWithObservations(self, key):
+    def _isKeyWithObservations(self, key):
         """ :rtype: bool """
         return key in self._key_manager.allDataTypeKeysWithObservations()
 
-    def isSummaryKey(self, key):
+    def _isSummaryKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.summaryKeys()
 
-    def isGenKwKey(self, key):
+    def _isGenKwKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.genKwKeys()
 
-    def isCustomKwKey(self, key):
+    def _isCustomKwKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.customKwKeys()
 
-    def isGenDataKey(self, key):
+    def _isGenDataKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.genDataKeys()
 
-    def isMisfitKey(self, key):
+    def _isMisfitKey(self, key):
         """ :rtype: bool """
         return key in self._key_manager.misfitKeys()
 
-    def dimentionalityOfKey(self, key):
-        if self.isSummaryKey(key) or self.isGenDataKey(key):
+    def _dimentionalityOfKey(self, key):
+        if self._isSummaryKey(key) or self._isGenDataKey(key):
             return 2
         else:
             return 1

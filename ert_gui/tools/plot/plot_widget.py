@@ -76,13 +76,13 @@ class PlotWidget(QWidget):
         """ @rtype: str """
         return self._name
 
-    def updatePlot(self):
+    def updatePlot(self, case_to_data_map, observations):
         if self.isDirty() and self.isActive():
             # print("Drawing: %s" % self._name)
             self.resetPlot()
             plot_context = self._plotContextFunction(self.getFigure())
             try:
-                self._plotter.plot(plot_context)
+                self._plotter.plot(plot_context, case_to_data_map, observations)
                 self._canvas.draw()
             except Exception as e:
                 exc_type, exc_value, exc_tb = sys.exc_info()

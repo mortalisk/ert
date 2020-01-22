@@ -3,18 +3,17 @@ from matplotlib.lines import Line2D
 from pandas import DataFrame
 
 from ert_gui.tools.plot.gui_api import GuiApi
+from ert_shared import ERT
 from .refcase import plotRefcase
 from .observations import plotObservations
 from .plot_tools import PlotTools
 
 class StatisticsPlot:
 
-    def __init__(self, api):
-        self._api = api
+    def __init__(self):
         self.dimentionality = 2
 
-    def plot(self, plot_context):
-        self._api = GuiApi()
+    def plot(self, plot_context, case_to_data_map, _observation_data):
         """ @type plot_context: ert_gui.plottery.PlotContext """
         key = plot_context.key()
         config = plot_context.plotConfig()
@@ -25,9 +24,7 @@ class StatisticsPlot:
         plot_context.y_axis = plot_context.VALUE_AXIS
         plot_context.x_axis = plot_context.DATE_AXIS
 
-        case_list = plot_context.cases()
-        for case in case_list:
-            data = self._api.dataForKey(case, key)
+        for case, data in case_to_data_map.items():
 
             if not data.empty:
                 if not data.index.is_all_dates:
@@ -59,7 +56,7 @@ class StatisticsPlot:
         _addStatisticsLegends(plot_config=config)
 
         #plotRefcase(plot_context, axes)
-        plotObservations(self._api, plot_context, axes)
+        plotObservations(_observation_data, plot_context, axes)
 
         default_x_label = "Date" if plot_context.isDateSupportActive() else "Index"
         PlotTools.finalizePlot(plot_context, axes, default_x_label=default_x_label, default_y_label="Value")

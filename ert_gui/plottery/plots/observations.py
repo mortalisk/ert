@@ -1,14 +1,12 @@
 import math
 
-def plotObservations(api, plot_context, axes):
+def plotObservations(observation_data, plot_context, axes):
     key = plot_context.key()
     config = plot_context.plotConfig()
     case_list = plot_context.cases()
 
-    if config.isObservationsEnabled() and api.isKeyWithObservations(key):
+    if config.isObservationsEnabled():
         if len(case_list) > 0:
-            observation_data = api.observationData(case_list[0], key)
-
             if not observation_data.empty:
                 _plotObservations(axes, config, observation_data, value_column=key)
 

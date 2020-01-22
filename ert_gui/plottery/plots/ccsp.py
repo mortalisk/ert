@@ -3,9 +3,16 @@ from matplotlib.lines import Line2D
 from .plot_tools import PlotTools
 import pandas as pd
 
-def plotCrossCaseStatistics(plot_context):
+class CrossCaseStatisticsPlot():
+
+    def __init__(self):
+        self.dimentionality = 1
+
+    def plot(self, plot_context, case_to_data_map, _observation_data):
+        plotCrossCaseStatistics(plot_context, case_to_data_map, _observation_data)
+
+def plotCrossCaseStatistics(plot_context, case_to_data_map, _observation_data):
     """ @type plot_context: ert_gui.plottery.PlotContext """
-    ert = plot_context.ert()
     key = plot_context.key()
     config = plot_context.plotConfig()
     axes = plot_context.figure().add_subplot(111)
@@ -33,9 +40,8 @@ def plotCrossCaseStatistics(plot_context):
         "p67": {},
         "p90": {}
     }
-    for case_index, case in enumerate(case_list):
+    for case_index, (case, data) in enumerate(case_to_data_map.items()):
         case_indexes.append(case_index)
-        data = plot_context.dataGatherer().gatherData(ert, case, key)
         std_dev_factor = config.getStandardDeviationFactor()
 
         if not data.empty:

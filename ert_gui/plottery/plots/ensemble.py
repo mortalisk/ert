@@ -6,15 +6,13 @@ from .plot_tools import PlotTools
 
 class EnsemblePlot:
 
-    def __init__(self, api):
-        self._api = api
+    def __init__(self):
         self.dimentionality = 2
 
-    def plot(self, plot_context):
+    def plot(self, plot_context, case_to_data_map, observation_data):
         """
         @type plot_context: ert_gui.plottery.PlotContext
         """
-        key = plot_context.key()
         config = plot_context.plotConfig()
         """:type: ert_gui.plottery.PlotConfig """
         axes = plot_context.figure().add_subplot(111)
@@ -25,8 +23,7 @@ class EnsemblePlot:
         plot_context.y_axis = plot_context.VALUE_AXIS
         plot_context.x_axis = plot_context.DATE_AXIS
 
-        for case in case_list:
-            data = self._api.dataForKey(case, key)
+        for case, data in case_to_data_map.items():
             if not data.empty:
                 if not data.index.is_all_dates:
                     plot_context.deactivateDateSupport()
@@ -36,7 +33,7 @@ class EnsemblePlot:
                 config.nextColor()
 
         #plotRefcase(plot_context, axes)
-        plotObservations(self._api, plot_context, axes)
+        plotObservations(observation_data, plot_context, axes)
         #plotHistory(plot_context, axes)
 
         default_x_label = "Date" if plot_context.isDateSupportActive() else "Index"

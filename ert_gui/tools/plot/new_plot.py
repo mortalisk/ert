@@ -1,7 +1,11 @@
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMainWindow, QDockWidget, QTabWidget, QWidget, QVBoxLayout
 
+from ert_gui.plottery.plots.ccsp import CrossCaseStatisticsPlot
+from ert_gui.plottery.plots.distribution import DistributionPlot
 from ert_gui.plottery.plots.ensemble import EnsemblePlot
+from ert_gui.plottery.plots.gaussian_kde import GaussianKDEPlot
+from ert_gui.plottery.plots.histogram import HistogramPlot
 from ert_gui.plottery.plots.statistics import StatisticsPlot
 from ert_shared import ERT
 from ert_gui.ertwidgets import showWaitCursorWhileWaiting
@@ -26,7 +30,7 @@ class NewPlotWindow(QMainWindow):
     def __init__(self, config_file, parent):
         QMainWindow.__init__(self, parent)
 
-        self._api = GuiApi()
+        self._api = GuiApi(ERT.ert)
 
         self.setMinimumWidth(850)
         self.setMinimumHeight(650)
@@ -53,12 +57,12 @@ class NewPlotWindow(QMainWindow):
         self._plot_widgets = []
         """:type: list of PlotWidget"""
 
-        self.addPlotWidget(ENSEMBLE, EnsemblePlot(self._api))
-        self.addPlotWidget(STATISTICS, StatisticsPlot(self._api))
-        # self.addPlotWidget(HISTOGRAM, plots.plotHistogram, 1)
-        # self.addPlotWidget(GAUSSIAN_KDE, plots.plotGaussianKDE, 1)
-        # self.addPlotWidget(DISTRIBUTION, plots.plotDistribution, 1)
-        # self.addPlotWidget(CROSS_CASE_STATISTICS, plots.plotCrossCaseStatistics, 1)
+        self.addPlotWidget(ENSEMBLE, EnsemblePlot())
+        self.addPlotWidget(STATISTICS, StatisticsPlot())
+        self.addPlotWidget(HISTOGRAM, HistogramPlot())
+        self.addPlotWidget(GAUSSIAN_KDE, GaussianKDEPlot())
+        self.addPlotWidget(DISTRIBUTION, DistributionPlot())
+        self.addPlotWidget(CROSS_CASE_STATISTICS, CrossCaseStatisticsPlot())
 
         self._key_definitions = self._api.allDataTypeKeys()
 
@@ -84,15 +88,23 @@ class NewPlotWindow(QMainWindow):
             plot_widget.setActive(False)
             index = self._central_tab.indexOf(plot_widget)
 
-            if index == self._central_tab.currentIndex() and plot_widget.canPlotKey(self.getSelectedKey()):
+            key = self.getSelectedKey()
+            key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
+
+            if index == self._central_tab.currentIndex() \
+                    and plot_widget._plotter.dimentionality == key_def["dimentionality"]:
                 plot_widget.setActive()
                 self._updateCustomizer(plot_widget)
-                plot_widget.updatePlot()
+                cases = self._case_selection_widget.getPlotCaseNames()
+                case_to_data_map = {case:self._api.dataForKey(case, key) for case in cases}
+                observations = self._api.observationForDataKey(cases[0], key)
+
+                plot_widget.updatePlot(case_to_data_map, observations)
 
     def _updateCustomizer(self, plot_widget):
         """ @type plot_widget: PlotWidget """
         key = self.getSelectedKey()
-        index_type = self._api.keyIndexType(key)
+        index_type = next(key_def["index_type"] for key_def in self._key_definitions if key_def["key"] == key)
 
 
         x_axis_type = PlotContext.UNKNOWN_AXIS
@@ -161,8 +173,15 @@ class NewPlotWindow(QMainWindow):
             self._central_tab.setTabEnabled(index, plot_widget._plotter.dimentionality == key_def["dimentionality"])
 
         for plot_widget in self._plot_widgets:
-            if plot_widget.canPlotKey(key):
-                plot_widget.updatePlot()
+            if plot_widget._plotter.dimentionality == key_def["dimentionality"]:
+                cases = self._case_selection_widget.getPlotCaseNames()
+                case_to_data_map = {case: self._api.dataForKey(case, key) for case in cases}
+
+                if key_def["has_observations"]:
+                    observations = self._api.observationForDataKey(cases[0], key)
+                else:
+                    observations = None
+                plot_widget.updatePlot(case_to_data_map, observations)
 
         self.currentPlotChanged()
 

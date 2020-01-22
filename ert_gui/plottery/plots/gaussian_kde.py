@@ -3,12 +3,18 @@ from scipy.stats import gaussian_kde
 from .plot_tools import PlotTools
 import pandas as pd
 
+class GaussianKDEPlot():
+    def __init__(self):
+        self.dimentionality = 1
 
-def plotGaussianKDE(plot_context):
+    def plot(self, plot_context, case_to_data_map, _observation_data):
+        plotGaussianKDE(plot_context, case_to_data_map, _observation_data)
+
+
+def plotGaussianKDE(plot_context, case_to_data_map, _observation_data):
     """
     @type plot_context: ert_gui.plottery.PlotContext
     """
-    ert = plot_context.ert()
     key = plot_context.key()
     config = plot_context.plotConfig()
     axes = plot_context.figure().add_subplot(111)
@@ -22,10 +28,7 @@ def plotGaussianKDE(plot_context):
         key = key[6:]
         axes.set_xscale("log")
 
-    case_list = plot_context.cases()
-    for case in case_list:
-        data = plot_context.dataGatherer().gatherData(ert, case, key)
-
+    for case, data in case_to_data_map.items():
         if not data.empty and data.nunique() > 1:
             _plotGaussianKDE(axes, config, data, case)
             config.nextColor()

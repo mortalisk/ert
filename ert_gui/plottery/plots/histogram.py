@@ -4,9 +4,16 @@ import numpy
 from .plot_tools import PlotTools
 import pandas as pd
 
-def plotHistogram(plot_context):
+class HistogramPlot:
+
+    def __init__(self):
+        self.dimentionality = 1
+
+    def plot(self, plot_context, case_to_data_map, _observation_data):
+        plotHistogram(plot_context, case_to_data_map, _observation_data)
+
+def plotHistogram(plot_context, case_to_data_map, _observation_data):
     """ @type plot_context: ert_gui.plottery.PlotContext """
-    ert = plot_context.ert()
     key = plot_context.key()
     config = plot_context.plotConfig()
 
@@ -33,8 +40,8 @@ def plotHistogram(plot_context):
     categories = set()
     max_element_count = 0
     categorical = False
-    for case in case_list:
-        data[case] = plot_context.dataGatherer().gatherData(ert, case, key)
+    for case, datas in case_to_data_map.items():
+        data[case] = datas
 
         if data[case].dtype == "object":
             try:
