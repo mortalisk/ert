@@ -1,5 +1,4 @@
 from .plot_config import PlotConfig
-from .plot_data_gatherer import PlotDataGatherer
 
 class PlotContext(object):
     UNKNOWN_AXIS = None

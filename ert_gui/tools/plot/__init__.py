@@ -13,7 +13,7 @@ from .plot_case_selection_widget import CaseSelectionWidget
 from .color_chooser import ColorBox
 from .style_chooser import StyleChooser
 
-from .new_plot import NewPlotWindow as PlotWindow
+from .plot_window import PlotWindow
 from .plot_tool import PlotTool
 
 
