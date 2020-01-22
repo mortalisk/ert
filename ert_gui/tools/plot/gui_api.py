@@ -1,3 +1,5 @@
+from res.enkf import RealizationStateEnum
+
 from ert_shared import ERT
 from pandas import DataFrame
 from res.enkf.export import GenKwCollector, SummaryCollector, GenDataCollector, SummaryObservationCollector, \
@@ -12,24 +14,22 @@ class GuiApi:
 
         self._key_manager = self._ert.getKeyManager()
 
-    def gatherObservationData(self, case, key):
-        if self.isSummaryKey(key):
-            return self.gatherSummaryObservationData(case, key)
-        elif self.isGenDataKey(key):
-            return self.gatherGenDataObservationData(case, key)
-        else:
-            raise ValueError("No observations for key: " + key)
+    def allDataTypeKeys(self):
+        return [{"key": key,
+                 "indexType": self.keyIndexType(key),
+                 "observations": self.observationKeys(key),
+                 "dimentionality": self.dimentionalityOfKey(key)}
+                for key in self._key_manager.allDataTypeKeys()]
 
-    def isKeyWithObservations(self, key):
-        return self._key_manager.isKeyWithObservations(key)
-
-    def keyIndexType(self, key):
-        if self._key_manager.isGenDataKey(key):
-            return "INDEX"
-        elif self._key_manager.isSummaryKey(key):
-            return "VALUE"
-        else:
-            return None
+    def getAllCasesNotRunning(self):
+        """ @rtype: list[str] """
+        fs = self._ert.getEnkfFsManager()
+        return [{"name": case,
+                 "hidden": fs.isCaseHidden(case),
+                 "has_data": fs.caseHasData(case)}
+                for case
+                in fs.getCaseList()
+                if not fs.isCaseRunning(case)]
 
     def dataForKey(self, case, key):
         if self.isSummaryKey(key):
@@ -41,8 +41,32 @@ class GuiApi:
         elif self.isGenDataKey(key):
             return self.gatherGenDataData(case, key)
 
-    def allDataTypeKeys(self):
-        return self._key_manager.allDataTypeKeys()
+    def observationData(self, case, key):
+        if self.isSummaryKey(key):
+            return self.gatherSummaryObservationData(case, key)
+        elif self.isGenDataKey(key):
+            return self.gatherGenDataObservationData(case, key)
+        else:
+            raise ValueError("No observations for key: " + key)
+
+    def isKeyWithObservations(self, key):
+        return self._key_manager.isKeyWithObservations(key)
+
+    def observationKeys(self, key):
+        if self._key_manager.isGenDataKey(key):
+            return [GenDataObservationCollector.getObservationKeyForDataKey(self._ert, key, 0)]
+        elif self._key_manager.isSummaryKey(key):
+            return SummaryObservationCollector.observationKeys(key)
+        else:
+            return []
+
+    def keyIndexType(self, key):
+        if self._key_manager.isGenDataKey(key):
+            return "INDEX"
+        elif self._key_manager.isSummaryKey(key):
+            return "VALUE"
+        else:
+            return None
 
 
     def gatherGenKwData(self, case, key):
@@ -94,6 +118,7 @@ class GuiApi:
             data = GuiApi.gatherSummaryData(case, key)
 
         return data
+
 
     def gatherSummaryObservationData(self, case, key):
         if self._ert.getKeyManager().isKeyWithObservations(key):

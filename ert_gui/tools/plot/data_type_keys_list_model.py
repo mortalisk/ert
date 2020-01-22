@@ -9,12 +9,12 @@ class DataTypeKeysListModel(QAbstractItemModel):
     HAS_OBSERVATIONS = QColor(237, 218, 116)
     GROUP_ITEM = QColor(64, 64, 64)
 
-    def __init__(self, api):
+    def __init__(self, keys):
         """
         @type ert: res.enkf.EnKFMain
         """
         QAbstractItemModel.__init__(self)
-        self._api = api
+        self._keys = keys
         self.__icon = resourceIcon("ide/small/bullet_star")
 
     def index(self, row, column, parent=None, *args, **kwargs):
@@ -24,7 +24,7 @@ class DataTypeKeysListModel(QAbstractItemModel):
         return QModelIndex()
 
     def rowCount(self, parent=None, *args, **kwargs):
-        return len(self._api.allDataTypeKeys())
+        return len(self._keys)
 
     def columnCount(self, QModelIndex_parent=None, *args, **kwargs):
         return 1
@@ -33,14 +33,14 @@ class DataTypeKeysListModel(QAbstractItemModel):
         assert isinstance(index, QModelIndex)
 
         if index.isValid():
-            items = self._api.allDataTypeKeys()
+            items = self._keys
             row = index.row()
             item = items[row]
 
             if role == Qt.DisplayRole:
-                return item
+                return item["key"]
             elif role == Qt.BackgroundRole:
-                if self._api.isKeyWithObservations(item):
+                if len(item["observations"]) > 0:
                     return self.HAS_OBSERVATIONS
 
     def itemAt(self, index):
@@ -48,25 +48,6 @@ class DataTypeKeysListModel(QAbstractItemModel):
 
         if index.isValid():
             row = index.row()
-            return self._api.allDataTypeKeys()[row]
+            return self._keys[row]["key"]
 
         return None
-
-
-    def isSummaryKey(self, key):
-        return self._api.isSummaryKey(key)
-
-    def isBlockKey(self, key):
-        return False
-
-    def isGenKWKey(self, key):
-        return self._api.isGenKwKey(key)
-
-    def isGenDataKey(self, key):
-        return self._api.isGenDataKey(key)
-
-    def isCustomKwKey(self, key):
-        return self._api.isCustomKwKey(key)
-
-    def isCustomPcaKey(self, key):
-        return False

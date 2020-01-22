@@ -64,14 +64,14 @@ class NewPlotWindow(QMainWindow):
         # self.addPlotWidget(DISTRIBUTION, plots.plotDistribution, 1)
         # self.addPlotWidget(CROSS_CASE_STATISTICS, plots.plotCrossCaseStatistics, 1)
 
-        data_types_key_model = DataTypeKeysListModel(self._api)
+        data_types_key_model = DataTypeKeysListModel(self._api.allDataTypeKeys())
 
         self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model)
         self._data_type_keys_widget.dataTypeKeySelected.connect(self.keySelected)
-        self.addDock("Data shmata blata types", self._data_type_keys_widget)
-
-        current_case = getCurrentCaseName()
-        self._case_selection_widget = CaseSelectionWidget(current_case)
+        self.addDock("Data types", self._data_type_keys_widget)
+        cases = self._api.getAllCasesNotRunning()
+        case_names = [case["name"] for case in cases if not case["hidden"] and case["has_data"]]
+        self._case_selection_widget = CaseSelectionWidget(case_names)
         self._case_selection_widget.caseSelectionChanged.connect(self.keySelected)
         self.addDock("Plot case", self._case_selection_widget)
 

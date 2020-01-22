@@ -7,7 +7,7 @@ def plotObservations(api, plot_context, axes):
 
     if config.isObservationsEnabled() and api.isKeyWithObservations(key):
         if len(case_list) > 0:
-            observation_data = api.gatherObservationData(case_list[0], key)
+            observation_data = api.observationData(case_list[0], key)
 
             if not observation_data.empty:
                 _plotObservations(axes, config, observation_data, value_column=key)
