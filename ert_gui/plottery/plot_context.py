@@ -10,20 +10,15 @@ class PlotContext(object):
     DEPTH_AXIS = "DEPTH"
     AXIS_TYPES = [UNKNOWN_AXIS, COUNT_AXIS, DATE_AXIS, DENSITY_AXIS, DEPTH_AXIS, INDEX_AXIS, VALUE_AXIS]
 
-    def __init__(self, figure, plot_config, cases, key):
+    def __init__(self, plot_config, cases, key):
         super(PlotContext, self).__init__()
         self._key = key
         self._cases = cases
-        self._figure = figure
         self._plot_config = plot_config
 
         self._date_support_active = True
         self._x_axis = None
         self._y_axis = None
-
-    def figure(self):
-        """ :rtype: matplotlib.figure.Figure"""
-        return self._figure
 
     def plotConfig(self):
         """ :rtype: PlotConfig """

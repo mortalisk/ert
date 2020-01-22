@@ -9,10 +9,10 @@ class HistogramPlot:
     def __init__(self):
         self.dimentionality = 1
 
-    def plot(self, plot_context, case_to_data_map, _observation_data):
-        plotHistogram(plot_context, case_to_data_map, _observation_data)
+    def plot(self, figure, plot_context, case_to_data_map, _observation_data):
+        plotHistogram(figure, plot_context, case_to_data_map, _observation_data)
 
-def plotHistogram(plot_context, case_to_data_map, _observation_data):
+def plotHistogram(figure, plot_context, case_to_data_map, _observation_data):
     """ @type plot_context: ert_gui.plottery.PlotContext """
     key = plot_context.key()
     config = plot_context.plotConfig()
@@ -73,7 +73,7 @@ def plotHistogram(plot_context, case_to_data_map, _observation_data):
     axes = {}
     """:type: dict of (str, matplotlib.axes.Axes) """
     for index, case in enumerate(case_list):
-        axes[case] = plot_context.figure().add_subplot(case_count, 1, index + 1)
+        axes[case] = figure.add_subplot(case_count, 1, index + 1)
 
         axes[case].set_title("%s (%s)" % (config.title(), case))
 

@@ -98,7 +98,9 @@ class PlotWindow(QMainWindow):
                 case_to_data_map = {case:self._api.dataForKey(case, key) for case in cases}
                 observations = self._api.observationForDataKey(cases[0], key)
 
-                plot_widget.updatePlot(case_to_data_map, observations)
+                plot_context = self.createPlotContext()
+
+                plot_widget.updatePlot(plot_context, case_to_data_map, observations)
 
     def _updateCustomizer(self, plot_widget):
         """ @type plot_widget: PlotWidget """
@@ -129,19 +131,19 @@ class PlotWindow(QMainWindow):
         self._plot_customizer.setAxisTypes(x_axis_type, y_axis_type)
 
 
-    def createPlotContext(self, figure):
+    def createPlotContext(self):
         key = self.getSelectedKey()
         cases = self._case_selection_widget.getPlotCaseNames()
         plot_config = PlotConfig.createCopy(self._plot_customizer.getPlotConfig())
         plot_config.setTitle(key)
-        return PlotContext(figure, plot_config, cases, key)
+        return PlotContext(plot_config, cases, key)
 
 
     def getSelectedKey(self):
         return str(self._data_type_keys_widget.getSelectedItem())
 
     def addPlotWidget(self, name, plotter, enabled=True):
-        plot_widget = PlotWidget(name, plotter, self.createPlotContext)
+        plot_widget = PlotWidget(name, plotter)
         plot_widget.customizationTriggered.connect(self.toggleCustomizeDialog)
 
         index = self._central_tab.addTab(plot_widget, name)
@@ -180,7 +182,9 @@ class PlotWindow(QMainWindow):
                     observations = self._api.observationForDataKey(cases[0], key)
                 else:
                     observations = None
-                plot_widget.updatePlot(case_to_data_map, observations)
+
+                plot_context = self.createPlotContext()
+                plot_widget.updatePlot(plot_context, case_to_data_map, observations)
 
         self.currentPlotChanged()
 

@@ -1,6 +1,3 @@
-from ert_gui.tools.plot.gui_api import GuiApi
-from .refcase import plotRefcase
-from .history import plotHistory
 from .observations import plotObservations
 from .plot_tools import PlotTools
 
@@ -9,13 +6,13 @@ class EnsemblePlot:
     def __init__(self):
         self.dimentionality = 2
 
-    def plot(self, plot_context, case_to_data_map, observation_data):
+    def plot(self, figure, plot_context, case_to_data_map, observation_data):
         """
         @type plot_context: ert_gui.plottery.PlotContext
         """
         config = plot_context.plotConfig()
         """:type: ert_gui.plottery.PlotConfig """
-        axes = plot_context.figure().add_subplot(111)
+        axes = figure.add_subplot(111)
         """:type: matplotlib.axes.Axes """
 
         case_list = plot_context.cases()

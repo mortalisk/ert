@@ -2,9 +2,6 @@ from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from pandas import DataFrame
 
-from ert_gui.tools.plot.gui_api import GuiApi
-from ert_shared import ERT
-from .refcase import plotRefcase
 from .observations import plotObservations
 from .plot_tools import PlotTools
 
@@ -13,12 +10,12 @@ class StatisticsPlot:
     def __init__(self):
         self.dimentionality = 2
 
-    def plot(self, plot_context, case_to_data_map, _observation_data):
+    def plot(self, figure, plot_context, case_to_data_map, _observation_data):
         """ @type plot_context: ert_gui.plottery.PlotContext """
         key = plot_context.key()
         config = plot_context.plotConfig()
         """:type: ert_gui.plotter.PlotConfig """
-        axes = plot_context.figure().add_subplot(111)
+        axes = figure.add_subplot(111)
         """:type: matplotlib.axes.Axes """
 
         plot_context.y_axis = plot_context.VALUE_AXIS

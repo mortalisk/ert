@@ -8,7 +8,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT
 
 from ert_gui.ertwidgets import resourceIcon
-from ert_gui.tools.plot.gui_api import GuiApi
 
 
 class CustomNavigationToolbar(NavigationToolbar2QT):
@@ -32,16 +31,14 @@ class CustomNavigationToolbar(NavigationToolbar2QT):
                 break
 
 
-
 class PlotWidget(QWidget):
     customizationTriggered = Signal()
 
-    def __init__(self, name, plotter, plotContextFunction, parent=None):
+    def __init__(self, name, plotter, parent=None):
         QWidget.__init__(self, parent)
 
         self._name = name
         self._plotter = plotter
-        self._plotContextFunction = plotContextFunction
         """:type: list of functions """
 
         self._figure = Figure()
@@ -76,13 +73,13 @@ class PlotWidget(QWidget):
         """ @rtype: str """
         return self._name
 
-    def updatePlot(self, case_to_data_map, observations):
+    def updatePlot(self, plot_context, case_to_data_map, observations):
         if self.isDirty() and self.isActive():
             # print("Drawing: %s" % self._name)
             self.resetPlot()
-            plot_context = self._plotContextFunction(self.getFigure())
+            figure = self.getFigure()
             try:
-                self._plotter.plot(plot_context, case_to_data_map, observations)
+                self._plotter.plot(figure, plot_context, case_to_data_map, observations)
                 self._canvas.draw()
             except Exception as e:
                 exc_type, exc_value, exc_tb = sys.exc_info()
@@ -108,6 +105,3 @@ class PlotWidget(QWidget):
     def isActive(self):
         return self._active
 
-    def canPlotKey(self, key):
-        api = GuiApi()
-        return api.dimentionalityOfKey(key) == self._plotter.dimentionality

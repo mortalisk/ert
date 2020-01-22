@@ -6,14 +6,14 @@ class DistributionPlot():
     def __init__(self):
         self.dimentionality = 1
 
-    def plot(self, plot_context, case_to_data_map, _observation_data):
-        plotDistribution(plot_context, case_to_data_map, _observation_data)
+    def plot(self, figure, plot_context, case_to_data_map, _observation_data):
+        plotDistribution(figure, plot_context, case_to_data_map, _observation_data)
 
-def plotDistribution(plot_context, case_to_data_map, _observation_data):
+def plotDistribution(figure, plot_context, case_to_data_map, _observation_data):
     """ @type plot_context: ert_gui.plottery.PlotContext """
     key = plot_context.key()
     config = plot_context.plotConfig()
-    axes = plot_context.figure().add_subplot(111)
+    axes = figure.add_subplot(111)
     """:type: matplotlib.axes.Axes """
 
     plot_context.deactivateDateSupport()
