@@ -42,7 +42,6 @@ class PlotWindow(QMainWindow):
         self._plot_customizer.settingsChanged.connect(self.keySelected)
 
         self._central_tab = QTabWidget()
-        self._central_tab.currentChanged.connect(self.currentPlotChanged)
 
         central_widget = QWidget()
         central_layout = QVBoxLayout()
@@ -63,15 +62,17 @@ class PlotWindow(QMainWindow):
         self.addPlotWidget(DISTRIBUTION, DistributionPlot())
         self.addPlotWidget(CROSS_CASE_STATISTICS, CrossCaseStatisticsPlot())
 
+        self._central_tab.currentChanged.connect(self.currentPlotChanged)
+
         self._key_definitions = self._api.allDataTypeKeys()
+        cases = self._api.getAllCasesNotRunning()
+        case_names = [case["name"] for case in cases if not case["hidden"] and case["has_data"]]
 
         data_types_key_model = DataTypeKeysListModel(self._key_definitions)
 
         self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model)
         self._data_type_keys_widget.dataTypeKeySelected.connect(self.keySelected)
         self.addDock("Data types", self._data_type_keys_widget)
-        cases = self._api.getAllCasesNotRunning()
-        case_names = [case["name"] for case in cases if not case["hidden"] and case["has_data"]]
         self._case_selection_widget = CaseSelectionWidget(case_names)
         self._case_selection_widget.caseSelectionChanged.connect(self.keySelected)
         self.addDock("Plot case", self._case_selection_widget)
@@ -186,7 +187,6 @@ class PlotWindow(QMainWindow):
                 plot_context = self.createPlotContext()
                 plot_widget.updatePlot(plot_context, case_to_data_map, observations)
 
-        self.currentPlotChanged()
 
 
     def toggleCustomizeDialog(self):
