@@ -66,7 +66,7 @@ class PlotWindow(QMainWindow):
 
         self._key_definitions = self._api.allDataTypeKeys()
         cases = self._api.getAllCasesNotRunning()
-        case_names = [case["name"] for case in cases if not case["hidden"] and case["has_data"]]
+        case_names = [case["name"] for case in cases if not case["hidden"]]
 
         data_types_key_model = DataTypeKeysListModel(self._key_definitions)
 
@@ -78,28 +78,30 @@ class PlotWindow(QMainWindow):
         self.addDock("Plot case", self._case_selection_widget)
 
         current_plot_widget = self._plot_widgets[self._central_tab.currentIndex()]
-        current_plot_widget.setActive()
         self._data_type_keys_widget.selectDefault()
         self._updateCustomizer(current_plot_widget)
 
 
     def currentPlotChanged(self):
-        for plot_widget in self._plot_widgets:
-            plot_widget.setActive(False)
-            index = self._central_tab.indexOf(plot_widget)
+        key = self.getSelectedKey()
+        key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
 
-            key = self.getSelectedKey()
-            key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
+        for plot_widget in self._plot_widgets:
+            index = self._central_tab.indexOf(plot_widget)
 
             if index == self._central_tab.currentIndex() \
                     and plot_widget._plotter.dimentionality == key_def["dimentionality"]:
-                plot_widget.setActive()
                 self._updateCustomizer(plot_widget)
                 cases = self._case_selection_widget.getPlotCaseNames()
-                case_to_data_map = {case:self._api.dataForKey(case, key) for case in cases}
-                observations = self._api.observationForDataKey(cases[0], key)
+                case_to_data_map = {case: self._api.dataForKey(case, key) for case in cases}
+                if key_def["has_observations"]:
+                    observations = self._api.observationForDataKey(cases[0], key)
+                else:
+                    observations = None
 
-                plot_context = self.createPlotContext()
+                plot_config = PlotConfig.createCopy(self._plot_customizer.getPlotConfig())
+                plot_config.setTitle(key)
+                plot_context = PlotContext(plot_config, cases, key)
 
                 plot_widget.updatePlot(plot_context, case_to_data_map, observations)
 
@@ -107,7 +109,6 @@ class PlotWindow(QMainWindow):
         """ @type plot_widget: PlotWidget """
         key = self.getSelectedKey()
         index_type = next(key_def["index_type"] for key_def in self._key_definitions if key_def["key"] == key)
-
 
         x_axis_type = PlotContext.UNKNOWN_AXIS
         y_axis_type = PlotContext.UNKNOWN_AXIS
@@ -130,15 +131,6 @@ class PlotWindow(QMainWindow):
             y_axis_type = PlotContext.DENSITY_AXIS
 
         self._plot_customizer.setAxisTypes(x_axis_type, y_axis_type)
-
-
-    def createPlotContext(self):
-        key = self.getSelectedKey()
-        cases = self._case_selection_widget.getPlotCaseNames()
-        plot_config = PlotConfig.createCopy(self._plot_customizer.getPlotConfig())
-        plot_config.setTitle(key)
-        return PlotContext(plot_config, cases, key)
-
 
     def getSelectedKey(self):
         return str(self._data_type_keys_widget.getSelectedItem())
@@ -170,22 +162,10 @@ class PlotWindow(QMainWindow):
         self._plot_customizer.switchPlotConfigHistory(key_def)
 
         for plot_widget in self._plot_widgets:
-            plot_widget.setDirty()
             index = self._central_tab.indexOf(plot_widget)
             self._central_tab.setTabEnabled(index, plot_widget._plotter.dimentionality == key_def["dimentionality"])
 
-        for plot_widget in self._plot_widgets:
-            if plot_widget._plotter.dimentionality == key_def["dimentionality"]:
-                cases = self._case_selection_widget.getPlotCaseNames()
-                case_to_data_map = {case: self._api.dataForKey(case, key) for case in cases}
-
-                if key_def["has_observations"]:
-                    observations = self._api.observationForDataKey(cases[0], key)
-                else:
-                    observations = None
-
-                plot_context = self.createPlotContext()
-                plot_widget.updatePlot(plot_context, case_to_data_map, observations)
+        self.currentPlotChanged()
 
 
 

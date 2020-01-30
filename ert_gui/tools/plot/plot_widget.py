@@ -59,12 +59,6 @@ class PlotWidget(QWidget):
         self._active = False
         self.resetPlot()
 
-
-    def getFigure(self):
-        """ :rtype: matplotlib.figure.Figure"""
-        return self._figure
-
-
     def resetPlot(self):
         self._figure.clear()
 
@@ -74,34 +68,15 @@ class PlotWidget(QWidget):
         return self._name
 
     def updatePlot(self, plot_context, case_to_data_map, observations):
-        if self.isDirty() and self.isActive():
-            # print("Drawing: %s" % self._name)
-            self.resetPlot()
-            figure = self.getFigure()
-            try:
-                self._plotter.plot(figure, plot_context, case_to_data_map, observations)
-                self._canvas.draw()
-            except Exception as e:
-                exc_type, exc_value, exc_tb = sys.exc_info()
-                sys.stderr.write("%s\n" % ("-" * 80))
-                traceback.print_tb(exc_tb)
-                sys.stderr.write("Exception type: %s\n" % exc_type.__name__)
-                sys.stderr.write("%s\n" % e)
-                sys.stderr.write("%s\n" % ("-" * 80))
-                sys.stderr.write("An error occurred during plotting. This stack trace is helpful for diagnosing the problem.")
-
-            self.setDirty(False)
-
-
-    def setDirty(self, dirty=True):
-        self._dirty = dirty
-
-    def isDirty(self):
-        return self._dirty
-
-    def setActive(self, active=True):
-        self._active = active
-
-    def isActive(self):
-        return self._active
-
+        self.resetPlot()
+        try:
+            self._plotter.plot(self._figure, plot_context, case_to_data_map, observations)
+            self._canvas.draw()
+        except Exception as e:
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            sys.stderr.write("%s\n" % ("-" * 80))
+            traceback.print_tb(exc_tb)
+            sys.stderr.write("Exception type: %s\n" % exc_type.__name__)
+            sys.stderr.write("%s\n" % e)
+            sys.stderr.write("%s\n" % ("-" * 80))
+            sys.stderr.write("An error occurred during plotting. This stack trace is helpful for diagnosing the problem.")

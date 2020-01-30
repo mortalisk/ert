@@ -60,7 +60,7 @@ class PlotTools(object):
 
 
     @staticmethod
-    def finalizePlot(plot_context, axes, default_x_label="Unnamed", default_y_label="Unnamed"):
+    def finalizePlot(plot_context, figure, axes, default_x_label="Unnamed", default_y_label="Unnamed"):
         """
         @type plot_context: ert_gui.plottery.PlotContext
         @type axes:
@@ -88,7 +88,7 @@ class PlotTools(object):
         axes.set_title(plot_config.title())
 
         if plot_context.isDateSupportActive():
-            plot_context.figure().autofmt_xdate()
+            figure.autofmt_xdate()
 
 
     @staticmethod

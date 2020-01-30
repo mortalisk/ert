@@ -74,7 +74,7 @@ def plotCrossCaseStatistics(figure, plot_context, case_to_data_map, _observation
 
     axes.set_xticklabels([""] + case_list + [""], rotation=rotation)
 
-    PlotTools.finalizePlot(plot_context, axes, default_x_label="Case", default_y_label="Value")
+    PlotTools.finalizePlot(plot_context, figure, axes, default_x_label="Case", default_y_label="Value")
 
 
 def _addStatisticsLegends(plot_config):

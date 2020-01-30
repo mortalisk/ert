@@ -34,7 +34,7 @@ class EnsemblePlot:
         #plotHistory(plot_context, axes)
 
         default_x_label = "Date" if plot_context.isDateSupportActive() else "Index"
-        PlotTools.finalizePlot(plot_context, axes, default_x_label=default_x_label, default_y_label="Value")
+        PlotTools.finalizePlot(plot_context, figure, axes, default_x_label=default_x_label, default_y_label="Value")
 
 
     def _plotLines(self, axes, plot_config, data, ensemble_label, is_date_supported):

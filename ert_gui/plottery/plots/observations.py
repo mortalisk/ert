@@ -5,11 +5,11 @@ def plotObservations(observation_data, plot_context, axes):
     config = plot_context.plotConfig()
     case_list = plot_context.cases()
 
-    if config.isObservationsEnabled():
-        if len(case_list) > 0:
-            if not observation_data.empty:
-                _plotObservations(axes, config, observation_data, value_column=key)
-
+    if (config.isObservationsEnabled()
+            and len(case_list) > 0
+            and observation_data is not None
+            and not observation_data.empty):
+        _plotObservations(axes, config, observation_data, value_column=key)
 
 
 def _plotObservations(axes, plot_config, data, value_column):

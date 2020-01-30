@@ -46,7 +46,7 @@ def plotDistribution(figure, plot_context, case_to_data_map, _observation_data):
 
     config.setLegendEnabled(False)
 
-    PlotTools.finalizePlot(plot_context, axes, default_x_label="Case", default_y_label="Value")
+    PlotTools.finalizePlot(plot_context, figure, axes, default_x_label="Case", default_y_label="Value")
 
 
 def _plotDistribution(axes, plot_config, data, label, index, previous_data):

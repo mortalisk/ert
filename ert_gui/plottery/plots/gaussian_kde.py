@@ -33,7 +33,7 @@ def plotGaussianKDE(figure, plot_context, case_to_data_map, _observation_data):
             _plotGaussianKDE(axes, config, data, case)
             config.nextColor()
 
-    PlotTools.finalizePlot(plot_context, axes, default_x_label="Value", default_y_label="Density")
+    PlotTools.finalizePlot(plot_context, figure, axes, default_x_label="Value", default_y_label="Density")
 
 
 def _plotGaussianKDE(axes, plot_config, data, label):
