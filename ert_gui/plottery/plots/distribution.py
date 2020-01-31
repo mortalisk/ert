@@ -31,7 +31,7 @@ def plotDistribution(figure, plot_context, case_to_data_map, _observation_data):
         case_indexes.append(case_index)
 
         if not data.empty:
-            _plotDistribution(axes, config, data, case, case_index, previous_data)
+            _plotDistribution(axes, config, data[key], case, case_index, previous_data)
             config.nextColor()
 
         previous_data = data

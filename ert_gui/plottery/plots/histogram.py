@@ -43,27 +43,29 @@ def plotHistogram(figure, plot_context, case_to_data_map, _observation_data):
     for case, datas in case_to_data_map.items():
         data[case] = datas
 
-        if data[case].dtype == "object":
-            try:
-                data[case] = pd.to_numeric(data[case], errors='ignore')
-            except AttributeError:
-                data[case] = data[case].convert_objects(convert_numeric=True)
+        # if data[case].dtype == "object":
+        #     try:
+        #         data[case] = pd.to_numeric(data[case], errors='ignore')
+        #     except AttributeError:
+        #         data[case] = data[case].convert_objects(convert_numeric=True)
 
-        if data[case].dtype == "object":
-            categorical = True
+        # if data[case].dtype == "object":
+        #     categorical = True
 
         if categorical:
             categories = categories.union(set(data[case].unique()))
         else:
+            current_min = data[case].min()[0]
+            current_max = data[case].max()[0]
             if minimum is None:
-                minimum = data[case].min()
+                minimum = current_min
             else:
-                minimum = min(minimum, data[case].min())
+                minimum = min(minimum, current_min)
 
             if maximum is None:
-                maximum = data[case].max()
+                maximum = current_max
             else:
-                maximum = max(maximum, data[case].max())
+                maximum = max(maximum, current_max)
 
             max_element_count = max(max_element_count, len(data[case].index))
 
