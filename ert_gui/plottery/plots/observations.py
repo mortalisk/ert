@@ -35,8 +35,8 @@ def _plotObservations(axes, plot_config, data, value_column):
     if style.line_style == '':
         style.width = 0
 
-    errorbars = axes.errorbar(x=data.index.values, y=data[value_column].values,
-                              yerr=data["STD_%s" % value_column].values,
+    errorbars = axes.errorbar(x=data.columns.get_level_values("key_index").values, y=data.loc["OBS"].values,
+                              yerr=data.loc["STD"].values,
                               fmt=style.line_style, ecolor=style.color, color=style.color,
                               capsize=cap_size(style.width),
                               capthick=style.width, #same as width/thickness on error line

@@ -29,7 +29,7 @@ class PlotWindow(QMainWindow):
     def __init__(self, config_file, parent):
         QMainWindow.__init__(self, parent)
 
-        self._api = GuiApi(ERT.ert)
+        self._api = GuiApi(ERT.enkf_facade)
 
         self.setMinimumWidth(850)
         self.setMinimumHeight(650)
@@ -94,8 +94,8 @@ class PlotWindow(QMainWindow):
                 self._updateCustomizer(plot_widget)
                 cases = self._case_selection_widget.getPlotCaseNames()
                 case_to_data_map = {case: self._api.dataForKey(case, key) for case in cases}
-                if key_def["has_observations"]:
-                    observations = self._api.observationForDataKey(cases[0], key)
+                if len(key_def["observations"]) > 0:
+                    observations = self._api.observationsForObsKeys(cases[0], key_def["observations"])
                 else:
                     observations = None
 
