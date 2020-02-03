@@ -45,7 +45,7 @@ def plotCrossCaseStatistics(figure, plot_context, case_to_data_map, _observation
         std_dev_factor = config.getStandardDeviationFactor()
 
         if not data.empty:
-            data = _assertNumeric(data[key])
+            data = _assertNumeric(data)
             if not data is None:
                 ccs["index"].append(case_index)
                 ccs["mean"][case_index] = data.mean()

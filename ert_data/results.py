@@ -34,11 +34,11 @@ class Results:
 
             measured_data = pd.concat([measured_data, data], axis=1)
 
-        return measured_data.astype(float)
+        return measured_data#.astype(float)
 
     def _data_for_key(self, key):
         if self._facade._isSummaryKey(key):
-            return self._facade._gatherSummaryData(self._case, key)
+            return self._facade._gatherSummaryData(self._case, key).T
         elif self._facade._isGenKwKey(key):
             return self._facade._gatherGenKwData(self._case, key)
         elif self._facade._isCustomKwKey(key):

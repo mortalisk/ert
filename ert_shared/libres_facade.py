@@ -107,10 +107,20 @@ class LibresFacade(object):
 
     def observation_keys(self, key):
         if self._enkf_main.getKeyManager().isGenDataKey(key):
-            key = key.split("@")[0]
-            return [GenDataObservationCollector.getObservationKeyForDataKey(self._enkf_main, key, 0)]
+            key_parts = key.split("@")
+            key = key_parts[0]
+            if len(key_parts) > 1:
+                report_step = int(key_parts[1])
+            else:
+                report_step = 0
+
+            obs_key = GenDataObservationCollector.getObservationKeyForDataKey(self._enkf_main, key, report_step)
+            if obs_key is not None:
+                return [obs_key]
+            else:
+                return []
         elif self._enkf_main.getKeyManager().isSummaryKey(key):
-            return SummaryObservationCollector.observationKeys(key)
+            return SummaryObservationCollector.observationKeys(self._enkf_main, key)
         else:
             return []
 
@@ -167,8 +177,13 @@ class LibresFacade(object):
 
     def _gatherGenDataData(self, case, key):
         """ :rtype: pandas.DataFrame """
-        key = key.split("@")[0]
-        report_step = 0
+        key_parts = key.split("@")
+        key = key_parts[0]
+        if len(key_parts) > 1:
+            report_step = int(key_parts[1])
+        else:
+            report_step = 0
+
         try:
             data = GenDataCollector.loadGenData(self._enkf_main, case, key, report_step)
         except ValueError:

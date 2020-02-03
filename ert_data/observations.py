@@ -19,7 +19,7 @@ class Observations:
             raise TypeError(
                 "Invalid type: {}, should be type: {}".format(type(data), pd.DataFrame)
             )
-        elif not set(expected_keys).issubset(data.index):
+        elif not data.empty and not set(expected_keys).issubset(data.index):
             raise ValueError(
                 "{} should be present in DataFrame index, missing: {}".format(
                     ["OBS", "STD"], set(expected_keys) - set(data.index)

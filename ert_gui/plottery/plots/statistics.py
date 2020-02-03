@@ -22,11 +22,12 @@ class StatisticsPlot:
         plot_context.x_axis = plot_context.DATE_AXIS
 
         for case, data in case_to_data_map.items():
-
+            data = data.T
             if not data.empty:
                 if not data.index.is_all_dates:
                     plot_context.deactivateDateSupport()
                     plot_context.x_axis = plot_context.INDEX_AXIS
+
 
                 style = config.getStatisticsStyle("mean")
                 rectangle = Rectangle((0, 0), 1, 1, color=style.color, alpha=0.8) # creates rectangle patch for legend use.

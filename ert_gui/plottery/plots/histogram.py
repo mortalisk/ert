@@ -55,8 +55,8 @@ def plotHistogram(figure, plot_context, case_to_data_map, _observation_data):
         if categorical:
             categories = categories.union(set(data[case].unique()))
         else:
-            current_min = data[case].min()[0]
-            current_max = data[case].max()[0]
+            current_min = data[case].min()
+            current_max = data[case].max()
             if minimum is None:
                 minimum = current_min
             else:
