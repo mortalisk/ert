@@ -43,14 +43,14 @@ def plotHistogram(figure, plot_context, case_to_data_map, _observation_data):
     for case, datas in case_to_data_map.items():
         data[case] = datas
 
-        # if data[case].dtype == "object":
-        #     try:
-        #         data[case] = pd.to_numeric(data[case], errors='ignore')
-        #     except AttributeError:
-        #         data[case] = data[case].convert_objects(convert_numeric=True)
+        if data[case].dtype == "object":
+            try:
+                data[case] = pd.to_numeric(data[case], errors='ignore')
+            except AttributeError:
+                data[case] = data[case].convert_objects(convert_numeric=True)
 
-        # if data[case].dtype == "object":
-        #     categorical = True
+        if data[case].dtype == "object":
+            categorical = True
 
         if categorical:
             categories = categories.union(set(data[case].unique()))
