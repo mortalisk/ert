@@ -40,11 +40,11 @@ class Results:
             return measured_data
 
     def _data_for_key(self, key):
-        if self._facade._isSummaryKey(key):
-            return self._facade._gatherSummaryData(self._case, key).T
-        elif self._facade._isGenKwKey(key):
-            return self._facade._gatherGenKwData(self._case, key)
-        elif self._facade._isCustomKwKey(key):
-            return self._facade._gatherCustomKwData(self._case, key)
-        elif self._facade._isGenDataKey(key):
-            return self._facade._gatherGenDataData(self._case, key).T
+        if self._facade.isSummaryKey(key):
+            return self._facade.gatherSummaryData(self._case, key).T
+        elif self._facade.isGenKwKey(key):
+            return self._facade.gatherGenKwData(self._case, key)
+        elif self._facade.isCustomKwKey(key):
+            return self._facade.gatherCustomKwData(self._case, key)
+        elif self._facade.isGenDataKey(key):
+            return self._facade.gatherGenDataData(self._case, key).T

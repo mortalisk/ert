@@ -15,6 +15,7 @@ class PlotContext(object):
         self._key = key
         self._cases = cases
         self._plot_config = plot_config
+        self.refcase_data = None
 
         self._date_support_active = True
         self._x_axis = None

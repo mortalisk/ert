@@ -17,10 +17,24 @@ class GuiApi:
 
     def allDataTypeKeys(self):
         return [{"key": key,
-                 "index_type": self._facade._keyIndexType(key),
+                 "index_type": self._facade.keyIndexType(key),
                  "observations": self._facade.observation_keys(key),
-                 "dimentionality": self._facade._dimentionalityOfKey(key)}
-                for key in self._facade.allDataTypeKeys()]
+                 "has_refcase": self._facade.has_refcase(key),
+                 "dimentionality": self._facade.dimentionality_of_key(key),
+                 "metadata": self._metadata(key)}
+                for key in self._facade.all_data_type_keys()]
+
+    def _metadata(self, key):
+        meta = {}
+        if self._facade.isSummaryKey(key):
+            meta["data_origin"] = "Summary"
+        elif self._facade.isGenDataKey(key):
+            meta["data_origin"] = "Gen Data"
+        elif self._facade.isGenKwKey(key):
+            meta["data_origin"] = "Gen KW"
+        elif self._facade.isCustomKwKey(key):
+            meta["data_origin"] = "Custom Data"
+        return meta
 
     def getAllCasesNotRunning(self):
         """ @rtype: list[str] """
@@ -37,3 +51,6 @@ class GuiApi:
 
     def observationsForObsKeys(self, case, obs_keys):
         return Observations(self._facade, obs_keys, case).data
+
+    def refcase_data(self, key):
+        return self._facade.refcase_data(key)

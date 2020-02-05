@@ -36,8 +36,8 @@ class PlotWindow(QMainWindow):
 
         self.setWindowTitle("Plotting - {}".format(config_file))
         self.activateWindow()
-
-        self._plot_customizer = PlotCustomizer(self)
+        self._key_definitions = self._api.allDataTypeKeys()
+        self._plot_customizer = PlotCustomizer(self, self._key_definitions)
 
         self._plot_customizer.settingsChanged.connect(self.keySelected)
 
@@ -64,13 +64,13 @@ class PlotWindow(QMainWindow):
 
         self._central_tab.currentChanged.connect(self.currentPlotChanged)
 
-        self._key_definitions = self._api.allDataTypeKeys()
+
         cases = self._api.getAllCasesNotRunning()
         case_names = [case["name"] for case in cases if not case["hidden"]]
 
         data_types_key_model = DataTypeKeysListModel(self._key_definitions)
 
-        self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model)
+        self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model, self._key_definitions)
         self._data_type_keys_widget.dataTypeKeySelected.connect(self.keySelected)
         self.addDock("Data types", self._data_type_keys_widget)
         self._case_selection_widget = CaseSelectionWidget(case_names)
@@ -83,8 +83,9 @@ class PlotWindow(QMainWindow):
 
 
     def currentPlotChanged(self):
-        key = self.getSelectedKey()
-        key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
+        key_def = self.getSelectedKey()
+        key = key_def["key"]
+        #key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
 
         for plot_widget in self._plot_widgets:
             index = self._central_tab.indexOf(plot_widget)
@@ -103,12 +104,15 @@ class PlotWindow(QMainWindow):
                 plot_config.setTitle(key)
                 plot_context = PlotContext(plot_config, cases, key)
 
+                if key_def["has_refcase"]:
+                    plot_context.refcase_data = self._api.refcase_data(key)
+
                 plot_widget.updatePlot(plot_context, case_to_data_map, observations)
 
     def _updateCustomizer(self, plot_widget):
         """ @type plot_widget: PlotWidget """
-        key = self.getSelectedKey()
-        index_type = next(key_def["index_type"] for key_def in self._key_definitions if key_def["key"] == key)
+        key_def = self.getSelectedKey()
+        index_type = key_def["index_type"]
 
         x_axis_type = PlotContext.UNKNOWN_AXIS
         y_axis_type = PlotContext.UNKNOWN_AXIS
@@ -133,7 +137,7 @@ class PlotWindow(QMainWindow):
         self._plot_customizer.setAxisTypes(x_axis_type, y_axis_type)
 
     def getSelectedKey(self):
-        return str(self._data_type_keys_widget.getSelectedItem())
+        return self._data_type_keys_widget.getSelectedItem()
 
     def addPlotWidget(self, name, plotter, enabled=True):
         plot_widget = PlotWidget(name, plotter)
@@ -157,8 +161,8 @@ class PlotWindow(QMainWindow):
 
     @showWaitCursorWhileWaiting
     def keySelected(self):
-        key = self.getSelectedKey()
-        key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
+        key_def = self.getSelectedKey()
+        #key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
         self._plot_customizer.switchPlotConfigHistory(key_def)
 
         for plot_widget in self._plot_widgets:

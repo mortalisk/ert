@@ -99,11 +99,8 @@ class LibresFacade(object):
     def is_case_running(self, case):
         return self._enkf_main.getEnkfFsManager().isCaseRunning(case)
 
-    def allDataTypeKeys(self):
+    def all_data_type_keys(self):
         return self._enkf_main.getKeyManager().allDataTypeKeys()
-
-    def _isKeyWithObservations(self, key):
-        return self._enkf_main.getKeyManager().isKeyWithObservations(key)
 
     def observation_keys(self, key):
         if self._enkf_main.getKeyManager().isGenDataKey(key):
@@ -124,7 +121,7 @@ class LibresFacade(object):
         else:
             return []
 
-    def _keyIndexType(self, key):
+    def keyIndexType(self, key):
         if self._enkf_main.getKeyManager().isGenDataKey(key):
             return "INDEX"
         elif self._enkf_main.getKeyManager().isSummaryKey(key):
@@ -133,12 +130,12 @@ class LibresFacade(object):
             return None
 
 
-    def _gatherGenKwData(self, case, key):
+    def gatherGenKwData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = GenKwCollector.loadAllGenKwData(self._enkf_main, case, [key])
         return data[key].dropna()
 
-    def _gatherSummaryData(self, case, key):
+    def gatherSummaryData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = SummaryCollector.loadAllSummaryData(self._enkf_main, case, [key])
         if not data.empty:
@@ -155,7 +152,11 @@ class LibresFacade(object):
 
         return data #.dropna()
 
-    def _gatherSummaryRefcaseData(self, key):
+    def has_refcase(self, key):
+        refcase = self._enkf_main.eclConfig().getRefcase()
+        return refcase is not None and key in refcase
+
+    def refcase_data(self, key):
         refcase = self._enkf_main.eclConfig().getRefcase()
 
         if refcase is None or key not in refcase:
@@ -169,13 +170,7 @@ class LibresFacade(object):
 
         return data.iloc[1:]
 
-    def _gatherSummaryObservationData(self, case, key):
-        if self._enkf_main.getKeyManager().isKeyWithObservations(key):
-            return SummaryObservationCollector.loadObservationData(self._enkf_main, case, [key]).dropna()
-        else:
-            return DataFrame()
-
-    def _gatherGenDataData(self, case, key):
+    def gatherGenDataData(self, case, key):
         """ :rtype: pandas.DataFrame """
         key_parts = key.split("@")
         key = key_parts[0]
@@ -191,55 +186,30 @@ class LibresFacade(object):
 
         return data.dropna() # removes all rows that has a NaN
 
-    def _gatherGenDataObservationData(self, case, key_with_report_step):
-        """ :rtype: pandas.DataFrame """
-        key = key_with_report_step.split("@")[0]
-        report_step = 0
-
-        obs_key = GenDataObservationCollector.getObservationKeyForDataKey(self._enkf_main, key, report_step)
-
-        if obs_key is not None:
-            obs_data = GenDataObservationCollector.loadGenDataObservations(self._enkf_main, case, obs_key)
-            columns = {obs_key: key_with_report_step, "STD_%s" % obs_key: "STD_%s" % key_with_report_step}
-            obs_data = obs_data.rename(columns=columns)
-        else:
-            obs_data = DataFrame()
-
-        return obs_data.dropna()
-
-    def _gatherCustomKwData(self, case, key):
+    def gatherCustomKwData(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = CustomKWCollector.loadAllCustomKWData(self._enkf_main, case, [key])[key]
 
         return data
 
-
-    def _isKeyWithObservations(self, key):
-        """ :rtype: bool """
-        return key in self._enkf_main.getKeyManager().allDataTypeKeysWithObservations()
-
-    def _isSummaryKey(self, key):
+    def isSummaryKey(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().summaryKeys()
 
-    def _isGenKwKey(self, key):
+    def isGenKwKey(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().genKwKeys()
 
-    def _isCustomKwKey(self, key):
+    def isCustomKwKey(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().customKwKeys()
 
-    def _isGenDataKey(self, key):
+    def isGenDataKey(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().genDataKeys()
 
-    def _isMisfitKey(self, key):
-        """ :rtype: bool """
-        return key in self._enkf_main.getKeyManager().misfitKeys()
-
-    def _dimentionalityOfKey(self, key):
-        if self._isSummaryKey(key) or self._isGenDataKey(key):
+    def dimentionality_of_key(self, key):
+        if self.isSummaryKey(key) or self.isGenDataKey(key):
             return 2
         else:
             return 1

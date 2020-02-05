@@ -48,6 +48,6 @@ class DataTypeKeysListModel(QAbstractItemModel):
 
         if index.isValid():
             row = index.row()
-            return self._keys[row]["key"]
+            return self._keys[row]
 
         return None
