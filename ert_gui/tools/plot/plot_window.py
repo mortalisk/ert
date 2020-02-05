@@ -14,7 +14,7 @@ from ert_gui.plottery import PlotContext, PlotConfig
 from ert_gui.tools.plot import DataTypeKeysWidget, CaseSelectionWidget, PlotWidget, DataTypeKeysListModel
 from ert_gui.tools.plot.customize import PlotCustomizer
 
-from .gui_api import GuiApi
+from ert_data.gui_api import GuiApi
 
 CROSS_CASE_STATISTICS = "Cross Case Statistics"
 DISTRIBUTION = "Distribution"
