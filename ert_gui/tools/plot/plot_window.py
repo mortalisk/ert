@@ -68,9 +68,8 @@ class PlotWindow(QMainWindow):
         cases = self._api.getAllCasesNotRunning()
         case_names = [case["name"] for case in cases if not case["hidden"]]
 
-        data_types_key_model = DataTypeKeysListModel(self._key_definitions)
 
-        self._data_type_keys_widget = DataTypeKeysWidget(data_types_key_model, self._key_definitions)
+        self._data_type_keys_widget = DataTypeKeysWidget(self._key_definitions)
         self._data_type_keys_widget.dataTypeKeySelected.connect(self.keySelected)
         self.addDock("Data types", self._data_type_keys_widget)
         self._case_selection_widget = CaseSelectionWidget(case_names)

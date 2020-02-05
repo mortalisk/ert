@@ -93,6 +93,7 @@ class CheckList(QWidget):
         items = self._model.getList()
 
         for item in items:
+            item = item["key"]
             list_item = QListWidgetItem(item)
             list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
 

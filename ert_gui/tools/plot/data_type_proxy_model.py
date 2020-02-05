@@ -21,8 +21,9 @@ from ert_gui.tools.plot import DataTypeKeysListModel
 
 class DataTypeProxyModel(QSortFilterProxyModel):
 
-    def __init__(self, model , parent=None):
+    def __init__(self, parent, model):
         QSortFilterProxyModel.__init__(self, parent)
+
         self.__show_summary_keys = True
         self.__show_block_keys = True
         self.__show_gen_kw_keys = True

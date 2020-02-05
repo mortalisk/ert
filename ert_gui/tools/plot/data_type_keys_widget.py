@@ -8,7 +8,7 @@ from ert_gui.tools.plot import DataTypeKeysListModel, DataTypeProxyModel, Filter
 class DataTypeKeysWidget(QWidget):
     dataTypeKeySelected = Signal()
 
-    def __init__(self, model, key_defs):
+    def __init__(self, key_defs):
         QWidget.__init__(self)
 
         self.__filter_popup = FilterPopup(self, key_defs)
@@ -16,8 +16,8 @@ class DataTypeKeysWidget(QWidget):
 
         layout = QVBoxLayout()
 
-        self.model = model
-        self.filter_model = DataTypeProxyModel(self.model)
+        self.model = DataTypeKeysListModel(key_defs)
+        self.filter_model = DataTypeProxyModel(self, self.model)
 
         filter_layout = QHBoxLayout()
 

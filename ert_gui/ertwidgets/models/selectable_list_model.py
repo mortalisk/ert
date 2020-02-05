@@ -28,7 +28,7 @@ class SelectableListModel(QObject):
 
     def unselectAll(self):
         for item in self.getList():
-            self._setSelectState(item, False)
+            self._setSelectState(item["key"], False)
 
         self.selectionChanged.emit()
 
