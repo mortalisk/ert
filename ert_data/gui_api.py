@@ -8,7 +8,6 @@ from pandas import DataFrame
 from res.enkf.export import GenKwCollector, SummaryCollector, GenDataCollector, SummaryObservationCollector, \
     GenDataObservationCollector, CustomKWCollector
 
-
 class GuiApi:
 
     def __init__(self, facade):
@@ -16,13 +15,14 @@ class GuiApi:
         """:type: res.enkf.enkf_main.EnKFMain"""
 
     def allDataTypeKeys(self):
-        return [{"key": key,
+        keys = [{"key": key,
                  "index_type": self._facade.keyIndexType(key),
                  "observations": self._facade.observation_keys(key),
                  "has_refcase": self._facade.has_refcase(key),
                  "dimentionality": self._facade.dimentionality_of_key(key),
                  "metadata": self._metadata(key)}
                 for key in self._facade.all_data_type_keys()]
+        return keys
 
     def _metadata(self, key):
         meta = {}
@@ -54,3 +54,5 @@ class GuiApi:
 
     def refcase_data(self, key):
         return self._facade.refcase_data(key)
+
+

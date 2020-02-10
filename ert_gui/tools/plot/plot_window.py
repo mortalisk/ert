@@ -103,6 +103,7 @@ class PlotWindow(QMainWindow):
                 plot_config.setTitle(key)
                 plot_context = PlotContext(plot_config, cases, key)
 
+                key_def["has_refcase"] = False
                 if key_def["has_refcase"]:
                     plot_context.refcase_data = self._api.refcase_data(key)
 

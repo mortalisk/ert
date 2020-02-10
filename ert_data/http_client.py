@@ -43,7 +43,15 @@ class HttpClient:
 
         connection.request("GET", path)
         reply = connection.getresponse()
-        dataframe = pd.read_csv(reply, index_col=[0], header=[0,1])
+        rows = reply.headers["X-header-rows"]
+        rowsi = int(rows)
+        # def data_parser()
+        dataframe = pd.read_csv(reply, infer_datetime_format=True, parse_dates=True,
+                                index_col=[0], header=list(range(rowsi)))
+        dataframe.index = list(range(len(dataframe)))
+
+        dataframe.columns
+
         try:
             return dataframe.astype(float)
         except ValueError:

@@ -46,7 +46,7 @@ df = api.dataForKey(case, key)
 
 print(df)
 
-http_client.stop_server()
+#http_client.stop_server()
 
 
 print("waiting for server to stop")

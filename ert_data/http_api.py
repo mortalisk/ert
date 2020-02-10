@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, Response
 import pandas as pd
 
 class HttpApi:
@@ -14,6 +14,20 @@ class HttpApi:
         }
         return res
 
+    def return_dataframe(self, dataframe):
+        header_rows = 1
+        if isinstance(dataframe.columns[0], tuple):
+            header_rows = len(dataframe.columns[0])
+
+        # for c in dataframe.columns:
+        #     if isinstance(c, datetime):
+        #         c = c.date()
+        csv = dataframe.to_csv(date_format="%Y-%m-%d")
+
+        r = Response(csv)
+        r.headers["X-header-rows"] = str(header_rows)
+        return r
+
     def get_data(self):
         key = request.args.get("key")
         case = request.args.get("case")
@@ -22,7 +36,7 @@ class HttpApi:
 
         if refcase == "true" and key is not None:
             data = self._api.refcase_data(key)
-            return data.to_csv()
+            return self.return_dataframe(data)
 
         if case is None or case == "":
             abort(400, "must have case")
@@ -31,13 +45,11 @@ class HttpApi:
             if len(obs_keys) > 0:
                 abort(400, "can not accept both key and obs_key at the same time")
             data = self._api.dataForKey(case, key)
-            data = pd.concat({case:data})
-            return data.to_csv()
+            return self.return_dataframe(data)
 
         obs_data = self._api.observationsForObsKeys(case, obs_keys)
         #obs_data.
-        csv = obs_data.to_csv()
-        return csv
+        return self.return_dataframe(obs_data)
 
     def stop(self):
         shutdown_hook = request.environ.get('werkzeug.server.shutdown')
