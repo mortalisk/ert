@@ -1,6 +1,11 @@
+from ert_data.gui_api import GuiApi
+from ert_data.http_api import HttpApi
+from ert_data.http_client import HttpClient
 from ert_gui.ertwidgets import resourceIcon
 from ert_gui.tools import Tool
 from ert_gui.tools.plot import PlotWindow
+from ert_shared import ERT
+import threading
 
 
 class PlotTool(Tool):
@@ -9,7 +14,25 @@ class PlotTool(Tool):
         self._config_file = config_file
 
     def trigger(self):
-        plot_window = PlotWindow(self._config_file, self.parent())
+
+        def run_server():
+            api = GuiApi(ERT.enkf_facade)
+            server = HttpApi(api)
+            server.run_http_server()
+
+
+        t = threading.Thread(target=run_server)
+        t.start()
+
+        client = HttpClient("localhost", 1337)
+        plot_window = PlotWindow(self._config_file, client, self.parent())
         plot_window.show()
+
+
+        #t.join()
+
+
+
+
 
 

@@ -26,10 +26,10 @@ STATISTICS = "Statistics"
 class PlotWindow(QMainWindow):
 
 
-    def __init__(self, config_file, parent):
+    def __init__(self, config_file, api, parent):
         QMainWindow.__init__(self, parent)
 
-        self._api = GuiApi(ERT.enkf_facade)
+        self._api = api
 
         self.setMinimumWidth(850)
         self.setMinimumHeight(650)
@@ -106,7 +106,9 @@ class PlotWindow(QMainWindow):
                 if key_def["has_refcase"]:
                     plot_context.refcase_data = self._api.refcase_data(key)
 
+                print("update plot")
                 plot_widget.updatePlot(plot_context, case_to_data_map, observations)
+                print("update plot done")
 
     def _updateCustomizer(self, plot_widget):
         """ @type plot_widget: PlotWidget """

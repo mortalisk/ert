@@ -117,7 +117,7 @@ class LibresFacade(object):
             else:
                 return []
         elif self._enkf_main.getKeyManager().isSummaryKey(key):
-            return SummaryObservationCollector.observationKeys(self._enkf_main, key)
+            return list(SummaryObservationCollector.observationKeys(self._enkf_main, key))
         else:
             return []
 
