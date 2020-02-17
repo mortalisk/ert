@@ -84,7 +84,6 @@ class PlotWindow(QMainWindow):
     def currentPlotChanged(self):
         key_def = self.getSelectedKey()
         key = key_def["key"]
-        #key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
 
         for plot_widget in self._plot_widgets:
             index = self._central_tab.indexOf(plot_widget)
@@ -161,7 +160,6 @@ class PlotWindow(QMainWindow):
     @showWaitCursorWhileWaiting
     def keySelected(self):
         key_def = self.getSelectedKey()
-        #key_def = next(key_def for key_def in self._key_definitions if key_def["key"] == key)
         self._plot_customizer.switchPlotConfigHistory(key_def)
 
         for plot_widget in self._plot_widgets:

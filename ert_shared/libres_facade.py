@@ -84,9 +84,6 @@ class LibresFacade(object):
             fs = self._enkf_main.getEnkfFsManager().getFileSystem(case_name)
             self._enkf_main.getEnkfFsManager().switchFileSystem(fs)
 
-
-# from GuiApi
-
     def cases(self):
         return self._enkf_main.getEnkfFsManager().getCaseList()
 
@@ -121,21 +118,12 @@ class LibresFacade(object):
         else:
             return []
 
-    def keyIndexType(self, key):
-        if self._enkf_main.getKeyManager().isGenDataKey(key):
-            return "INDEX"
-        elif self._enkf_main.getKeyManager().isSummaryKey(key):
-            return "VALUE"
-        else:
-            return None
-
-
-    def gatherGenKwData(self, case, key):
+    def gather_gen_kw_data(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = GenKwCollector.loadAllGenKwData(self._enkf_main, case, [key])
         return data[key].dropna()
 
-    def gatherSummaryData(self, case, key):
+    def gather_summary_data(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = SummaryCollector.loadAllSummaryData(self._enkf_main, case, [key])
         if not data.empty:
@@ -146,7 +134,6 @@ class LibresFacade(object):
                       "timestamps. A possible explanation is that your "
                       "simulation timestep is less than a second.")
                 data = data.drop_duplicates()
-
 
             data = data.pivot(index="Date", columns="Realization", values=key)
 
@@ -170,7 +157,7 @@ class LibresFacade(object):
 
         return data.iloc[1:]
 
-    def gatherGenDataData(self, case, key):
+    def gather_gen_data_data(self, case, key):
         """ :rtype: pandas.DataFrame """
         key_parts = key.split("@")
         key = key_parts[0]
@@ -186,31 +173,24 @@ class LibresFacade(object):
 
         return data.dropna() # removes all rows that has a NaN
 
-    def gatherCustomKwData(self, case, key):
+    def gather_custom_kw_data(self, case, key):
         """ :rtype: pandas.DataFrame """
         data = CustomKWCollector.loadAllCustomKWData(self._enkf_main, case, [key])[key]
 
         return data
 
-    def isSummaryKey(self, key):
+    def is_summary_key(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().summaryKeys()
 
-    def isGenKwKey(self, key):
+    def is_gen_kw_key(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().genKwKeys()
 
-    def isCustomKwKey(self, key):
+    def is_custom_kw_key(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().customKwKeys()
 
-    def isGenDataKey(self, key):
+    def is_gen_data_key(self, key):
         """ :rtype: bool """
         return key in self._enkf_main.getKeyManager().genDataKeys()
-
-    def dimentionality_of_key(self, key):
-        if self.isSummaryKey(key) or self.isGenDataKey(key):
-            return 2
-        else:
-            return 1
-

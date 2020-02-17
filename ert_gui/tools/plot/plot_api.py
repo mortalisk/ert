@@ -6,26 +6,25 @@ class PlotApi:
 
     def __init__(self, facade):
         self._facade = facade
-        """:type: res.enkf.enkf_main.EnKFMain"""
 
     def all_data_type_keys(self):
         return [{"key": key,
-                 "index_type": self._facade.keyIndexType(key),
+                 "index_type": self._key_index_type(key),
                  "observations": self._facade.observation_keys(key),
                  "has_refcase": self._facade.has_refcase(key),
-                 "dimentionality": self._facade.dimentionality_of_key(key),
+                 "dimentionality": self._dimentionality_of_key(key),
                  "metadata": self._metadata(key)}
                 for key in self._facade.all_data_type_keys()]
 
     def _metadata(self, key):
         meta = {}
-        if self._facade.isSummaryKey(key):
+        if self._facade.is_summary_key(key):
             meta["data_origin"] = "Summary"
-        elif self._facade.isGenDataKey(key):
+        elif self._facade.is_gen_data_key(key):
             meta["data_origin"] = "Gen Data"
-        elif self._facade.isGenKwKey(key):
+        elif self._facade.is_gen_kw_key(key):
             meta["data_origin"] = "Gen KW"
-        elif self._facade.isCustomKwKey(key):
+        elif self._facade.is_custom_kw_key(key):
             meta["data_origin"] = "Custom Data"
         return meta
 
@@ -47,3 +46,19 @@ class PlotApi:
 
     def refcase_data(self, key):
         return self._facade.refcase_data(key)
+
+    def _dimentionality_of_key(self, key):
+        if self._facade.is_summary_key(key) or self._facade.is_gen_data_key(key):
+            return 2
+        else:
+            return 1
+
+    def _key_index_type(self, key):
+        if self._facade.is_gen_data_key(key):
+            return "INDEX"
+        elif self._facade.is_summary_key(key):
+            return "VALUE"
+        else:
+            return None
+
+
