@@ -18,9 +18,12 @@ def data_loader_factory(observation_type):
 
 
 def load_general_data(facade, observation_key, case_name):
-    obs_vector = facade.get_observations()[observation_key]
-
+    observations = facade.get_observations()
     data = pd.DataFrame()
+    if observation_key not in observations:
+        return data
+
+    obs_vector = facade.get_observations()[observation_key]
 
     for time_step in obs_vector.getStepList().asList():
 
