@@ -11,10 +11,10 @@ from ert_shared import ERT
 from ert_gui.ertwidgets import showWaitCursorWhileWaiting
 from ert_gui.plottery import PlotContext, PlotConfig
 
-from ert_gui.tools.plot import DataTypeKeysWidget, CaseSelectionWidget, PlotWidget, DataTypeKeysListModel
+from ert_gui.tools.plot import DataTypeKeysWidget, CaseSelectionWidget, PlotWidget
 from ert_gui.tools.plot.customize import PlotCustomizer
 
-from ert_data.gui_api import GuiApi
+from ert_gui.tools.plot.plot_api import PlotApi
 
 CROSS_CASE_STATISTICS = "Cross Case Statistics"
 DISTRIBUTION = "Distribution"
@@ -29,14 +29,14 @@ class PlotWindow(QMainWindow):
     def __init__(self, config_file, parent):
         QMainWindow.__init__(self, parent)
 
-        self._api = GuiApi(ERT.enkf_facade)
+        self._api = PlotApi(ERT.enkf_facade)
 
         self.setMinimumWidth(850)
         self.setMinimumHeight(650)
 
         self.setWindowTitle("Plotting - {}".format(config_file))
         self.activateWindow()
-        self._key_definitions = self._api.allDataTypeKeys()
+        self._key_definitions = self._api.all_data_type_keys()
         self._plot_customizer = PlotCustomizer(self, self._key_definitions)
 
         self._plot_customizer.settingsChanged.connect(self.keySelected)
@@ -65,7 +65,7 @@ class PlotWindow(QMainWindow):
         self._central_tab.currentChanged.connect(self.currentPlotChanged)
 
 
-        cases = self._api.getAllCasesNotRunning()
+        cases = self._api.get_all_cases_not_running()
         case_names = [case["name"] for case in cases if not case["hidden"]]
 
 
@@ -93,9 +93,9 @@ class PlotWindow(QMainWindow):
                     and plot_widget._plotter.dimentionality == key_def["dimentionality"]:
                 self._updateCustomizer(plot_widget)
                 cases = self._case_selection_widget.getPlotCaseNames()
-                case_to_data_map = {case: self._api.dataForKey(case, key)[key] for case in cases}
+                case_to_data_map = {case: self._api.data_for_key(case, key)[key] for case in cases}
                 if len(key_def["observations"]) > 0:
-                    observations = self._api.observationsForObsKeys(cases[0], key_def["observations"])
+                    observations = self._api.observations_for_obs_keys(cases[0], key_def["observations"])
                 else:
                     observations = None
 

@@ -1,21 +1,14 @@
-from res.enkf import RealizationStateEnum
-
-from ert_data.measured import MeasuredData
 from ert_data.observations import Observations
 from ert_data.results import Results
-from ert_shared import ERT
-from pandas import DataFrame
-from res.enkf.export import GenKwCollector, SummaryCollector, GenDataCollector, SummaryObservationCollector, \
-    GenDataObservationCollector, CustomKWCollector
 
 
-class GuiApi:
+class PlotApi:
 
     def __init__(self, facade):
         self._facade = facade
         """:type: res.enkf.enkf_main.EnKFMain"""
 
-    def allDataTypeKeys(self):
+    def all_data_type_keys(self):
         return [{"key": key,
                  "index_type": self._facade.keyIndexType(key),
                  "observations": self._facade.observation_keys(key),
@@ -36,7 +29,7 @@ class GuiApi:
             meta["data_origin"] = "Custom Data"
         return meta
 
-    def getAllCasesNotRunning(self):
+    def get_all_cases_not_running(self):
         """ @rtype: list[str] """
         facade = self._facade
         return [{"name": case,
@@ -46,10 +39,10 @@ class GuiApi:
                 in facade.cases()
                 if not facade.is_case_running(case)]
 
-    def dataForKey(self, case, key):
+    def data_for_key(self, case, key):
         return Results(self._facade, [key], case).data
 
-    def observationsForObsKeys(self, case, obs_keys):
+    def observations_for_obs_keys(self, case, obs_keys):
         return Observations(self._facade, obs_keys, case).data
 
     def refcase_data(self, key):
