@@ -47,10 +47,10 @@ class HttpClient:
         rowsi = int(rows)
         # def data_parser()
         dataframe = pd.read_csv(reply, infer_datetime_format=True, parse_dates=True,
-                                index_col=[0], header=list(range(rowsi)))
-        dataframe.index = list(range(len(dataframe)))
+                                index_col=list(range(rowsi)), header=[0])
+        #dataframe.index = list(range(len(dataframe)))
 
-        dataframe.columns
+        #dataframe = dataframe.T
 
         try:
             return dataframe.astype(float)

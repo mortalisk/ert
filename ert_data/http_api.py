@@ -16,8 +16,8 @@ class HttpApi:
 
     def return_dataframe(self, dataframe):
         header_rows = 1
-        if isinstance(dataframe.columns[0], tuple):
-            header_rows = len(dataframe.columns[0])
+        if isinstance(dataframe.index[0], tuple):
+            header_rows = len(dataframe.index[0])
 
         # for c in dataframe.columns:
         #     if isinstance(c, datetime):

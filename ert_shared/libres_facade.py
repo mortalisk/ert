@@ -1,11 +1,17 @@
+import math
+
+import numpy
 from pandas import DataFrame
 from res.analysis.analysis_module import AnalysisModule
 from res.analysis.enums.analysis_module_options_enum import \
     AnalysisModuleOptionsEnum
+from res.enkf import RealizationStateEnum
 from res.enkf.export import (GenDataCollector, SummaryCollector,
                              SummaryObservationCollector, GenDataObservationCollector, GenKwCollector,
                              CustomKWCollector)
-from res.enkf.plot_data import PlotBlockDataLoader
+from res.enkf.plot_data import PlotBlockDataLoader, EnsemblePlotGenKW, EnsemblePlotGenData
+
+from ert_shared.data_result import DataResult
 
 
 class LibresFacade(object):
@@ -129,6 +135,123 @@ class LibresFacade(object):
         else:
             return None
 
+    def activeRealizations(self):
+        return SummaryCollector.createActiveList(self)
+
+    def data_for_key(self, case=None, key=None, realization=None):
+
+
+        if case is not None:
+            cases = [case]
+        else:
+            cases = [case
+                     for case
+                     in self.cases()
+                     if (not self.is_case_hidden(case)
+                         and not self.is_case_running(case)
+                         and self.case_has_data(case))]
+        if key is not None:
+            keys = [key]
+        else:
+            keys = self.all_data_type_keys()
+
+        if realization is not None:
+            realizations = [realization]
+        else:
+            realizations = self.activeRealizations()
+
+        for case in cases:
+            fs = self._enkf_main.getEnkfFsManager().getFileSystem(case)
+            for realization in realizations:
+                for key in keys:
+                    if self.isSummaryKey(key):
+                        data, index = self.gatherSummaryData(self._case, key)
+                    elif self.isGenKwKey(key):
+                        data, index = self.genKwData(case, key, realization)
+                    elif self.isCustomKwKey(key):
+                        data, index = self.gatherCustomKwData(self._case, key).T
+                    elif self.isGenDataKey(key):
+                        data, index = self.loadGenData(fs, key, realization)
+
+                    res = DataResult(case, key, realization, data, index)
+                    yield res
+
+
+    def loadGenData(ert, case_fs, key, realization_number):
+
+        key_parts = key.split("@")
+        key = key_parts[0]
+        if len(key_parts) > 1:
+            report_step = int(key_parts[1])
+        else:
+            report_step = 0
+
+
+        fs = case_fs
+        realizations = fs.realizationList( RealizationStateEnum.STATE_HAS_DATA )
+        config_node = ert.ensembleConfig().getNode(key)
+        gen_data_config = config_node.getModelConfig()
+
+        ensemble_data = EnsemblePlotGenData( config_node , fs , report_step )
+        # The data size and active can only be inferred *after* the EnsembleLoad.
+        data_size = gen_data_config.getDataSize( report_step )
+        active_mask = gen_data_config.getActiveMask()
+
+        realization_vector = ensemble_data[realization_number]
+
+        index_array = []
+        value_array = []
+
+        if len(realization_vector) > 0: # Must check because of a bug changing between different case with different states
+            for data_index in range(data_size):
+                value = None
+                if active_mask[data_index]:
+                    value = realization_vector[data_index]
+                value_array.append(value)
+                index_array.append(data_index)
+
+        data_numpy = numpy.array(value_array)
+        index_numpy = numpy.array(index_array)
+        return data_numpy, index_numpy
+
+    def genKwData(self, fs, key, realization_number):
+
+        realizations = GenKwCollector.createActiveList(self._enkf_main, fs)
+
+
+        key, keyword = key.split(":")
+
+        use_log_scale = False
+        if key.startswith("LOG10_"):
+            key = key[6:]
+            use_log_scale = True
+
+        ensemble_config_node = self._enkf_main.ensembleConfig().getNode(key)
+        ensemble_data = EnsemblePlotGenKW(ensemble_config_node, fs)
+        keyword_index = ensemble_data.getIndexForKeyword(keyword)
+
+
+        realization_vector = ensemble_data[realization_number]
+
+        value = realization_vector[keyword_index]
+
+        if use_log_scale:
+            value = math.log10(value)
+
+        data_array = numpy.array([value])
+        index_array = numpy.array([0])
+        return data_array, index_array
+
+
+    def _old_data_for_key(self, case, key=None, realization=None):
+        if self.isSummaryKey(key):
+            return self.gatherSummaryData(self._case, key)
+        elif self.isGenKwKey(key):
+            return self.genKwData(case, key, realization)
+        elif self.isCustomKwKey(key):
+            return self.gatherCustomKwData(self._case, key).T
+        elif self.isGenDataKey(key):
+            return self.gatherGenDataData(self._case, key)
 
     def gatherGenKwData(self, case, key):
         """ :rtype: pandas.DataFrame """

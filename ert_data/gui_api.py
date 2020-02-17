@@ -5,6 +5,7 @@ from ert_data.observations import Observations
 from ert_data.results import Results
 from ert_shared import ERT
 from pandas import DataFrame
+import pandas as pd
 from res.enkf.export import GenKwCollector, SummaryCollector, GenDataCollector, SummaryObservationCollector, \
     GenDataObservationCollector, CustomKWCollector
 
@@ -47,7 +48,15 @@ class GuiApi:
                 if not facade.is_case_running(case)]
 
     def dataForKey(self, case, key):
-        return Results(self._facade, [key], case).data
+        df = DataFrame()
+        for res in self._facade.data_for_key(case, key):
+            #create a dataframe with only one realization
+            real_frame = DataFrame({res.realization_number:res.data_array}, index=res.index_array)
+
+            #join each realization into one dataframe
+            df = pd.concat([df, real_frame], axis=1)
+
+        return df
 
     def observationsForObsKeys(self, case, obs_keys):
         return Observations(self._facade, obs_keys, case).data

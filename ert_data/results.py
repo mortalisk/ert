@@ -30,9 +30,9 @@ class Results:
             # helpful
             #_add_index_range(data)
 
-            data = pd.concat({key: data}, axis=1)
+            #data = pd.concat({key: data})
 
-            measured_data = pd.concat([measured_data, data], axis=1)
+            measured_data = measured_data.append({key:data})
 
         try:
             return measured_data.astype(float)
@@ -41,10 +41,11 @@ class Results:
 
     def _data_for_key(self, key):
         if self._facade.isSummaryKey(key):
-            return self._facade.gatherSummaryData(self._case, key).T
+            return self._facade.gatherSummaryData(self._case, key)
         elif self._facade.isGenKwKey(key):
-            return self._facade.gatherGenKwData(self._case, key)
+            return self._facade.genKwData(self._case, key)
         elif self._facade.isCustomKwKey(key):
-            return self._facade.gatherCustomKwData(self._case, key)
+            return self._facade.gatherCustomKwData(self._case, key).T
         elif self._facade.isGenDataKey(key):
-            return self._facade.gatherGenDataData(self._case, key).T
+            return self._facade.gatherGenDataData(self._case, key)
+
