@@ -19,26 +19,31 @@ def data_loader_factory(observation_type):
 
 def load_general_data(facade, observation_key, case_name):
     observations = facade.get_observations()
-    data = pd.DataFrame()
     if observation_key not in observations:
-        return data
+        return pd.DataFrame()
 
     obs_vector = observations[observation_key]
+    data_points = []
+    std = []
+    indices = []
 
     for time_step in obs_vector.getStepList().asList():
 
         node = obs_vector.getNode(time_step)
         index_list = [node.getIndex(nr) for nr in range(len(node))]
 
-        data = (
-            data.append(
-                pd.DataFrame(
-                    [node.get_data_points()], columns=index_list, index=["OBS"]
-                )
-            )
-            .append(pd.DataFrame([node.get_std()], columns=index_list, index=["STD"]))
-        )
-    return data
+        data_points.extend(node.get_data_points())
+        std.extend(node.get_std())
+        indices.extend(index_list)
+
+    data = {
+        "OBS": data_points,
+        "STD": std
+    }
+
+    df = pd.DataFrame(data=data, index=index_list).T
+
+    return df
 
 
 def load_block_data(facade, observation_key, case_name):
@@ -50,22 +55,22 @@ def load_block_data(facade, observation_key, case_name):
     obs_vector = facade.get_observations()[observation_key]
     loader = facade.create_plot_block_data_loader(obs_vector)
 
-    data = pd.DataFrame()
+    data_points = []
+    std = []
     for report_step in obs_vector.getStepList().asList():
 
         obs_block = loader.getBlockObservation(report_step)
 
-        data = (
-            data.append(
-                pd.DataFrame(
-                    [[obs_block.getValue(i) for i in obs_block]], index=["OBS"]
-                )
-            )
-            .append(
-                pd.DataFrame([[obs_block.getStd(i) for i in obs_block]], index=["STD"])
-            )
-        )
-    return data
+        data_points.extend([obs_block.getValue(i) for i in obs_block])
+        std.extend([obs_block.getStd(i) for i in obs_block])
+
+    data = {
+        "OBS": data_points,
+        "STD": std
+    }
+
+    df = pd.DataFrame(data=data).T
+    return df
 
 
 def load_summary_data(facade, observation_key, case_name):
