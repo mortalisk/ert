@@ -23,20 +23,10 @@ def load_general_data(facade, observation_key, case_name):
     if observation_key not in observations:
         return data
 
-    obs_vector = facade.get_observations()[observation_key]
+    obs_vector = observations[observation_key]
 
     for time_step in obs_vector.getStepList().asList():
 
-        # Observations and its standard deviation are a subset of the simulation data.
-        # The index_list refers to indices in the simulation data. In order to
-        # join these data in a DataFrame, pandas inserts the obs/std
-        # data into the columns representing said indices, before appending
-        # the simulation data.
-        # You then get something like:
-        #      0   1   2
-        # OBS  NaN NaN 42
-        # STD  NaN NaN 4.2
-        #   0  1.2 2.3 7.5
         node = obs_vector.getNode(time_step)
         index_list = [node.getIndex(nr) for nr in range(len(node))]
 
