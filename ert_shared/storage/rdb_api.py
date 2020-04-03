@@ -9,6 +9,7 @@ from ert_shared.storage.model import (
     Response,
     ResponseDefinition,
     Update,
+    ParameterPrior
 )
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import Bundle
@@ -115,11 +116,11 @@ class RdbApi:
     def get_observation(self, name):
         return self._session.query(Observation).filter_by(name=name).first()
 
-    def add_ensemble(self, name, reference=None):
+    def add_ensemble(self, name, reference=None, priors=None):
         msg = "Adding ensemble with name '{}'"
         logging.info(msg.format(name))
 
-        ensemble = Ensemble(name=name)
+        ensemble = Ensemble(name=name, priors=priors)
         self._session.add(ensemble)
         if reference is not None:
             msg = "Adding ensemble '{}' as reference. '{}' is used on this update step."
@@ -309,3 +310,16 @@ class RdbApi:
             .filter(ResponseDefinition.ensemble_id == ensemble_id)
             .one()
         )
+    
+    def add_prior(self, key, prior_data):
+        msg = "Adding prior with name '{}', prior data '{}'"
+        logging.info(
+            msg.format(key, prior_data)
+        )
+
+        prior = ParameterPrior(
+            key=key,
+            data=prior_data
+        )
+        self._session.add(prior)
+        return prior

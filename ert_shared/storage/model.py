@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, PickleType, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, PickleType, DateTime, JSON, Table
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.sql import func
@@ -252,3 +252,17 @@ class ErtBlob(Blobs):
 
     def __repr__(self):
         return "<Value(id='{}', data='{}')>".format(self.id, self.data)
+
+
+
+prior_ensemble_association_table = Table('prior_ensemble_association_table', Entities.metadata,
+    Column('prior_id', String, ForeignKey('parameter_priors.key')),
+    Column('ensemble_id', Integer, ForeignKey('ensembles.id'))
+)
+
+class ParameterPrior(Entities):
+    __tablename__ = "parameter_priors"
+
+    key = Column('key', String, primary_key=True)
+    data = Column('data', JSON)
+    ensemble = relationship("Ensemble", secondary=lambda: prior_ensemble_association_table, backref="priors")

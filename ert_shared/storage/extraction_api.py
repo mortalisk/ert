@@ -8,10 +8,12 @@ from ert_shared.storage.blob_api import BlobApi
 from ert_shared.storage.rdb_api import RdbApi
 
 
-def _create_ensemble(rdb_api, reference):
+def _create_ensemble(rdb_api, reference, priors):
+    if not ((reference is None) ^ (priors is None)):
+        raise ValueError("Ensembles can have only a reference or a set of priors")
     facade = ERT.enkf_facade
     ensemble_name = facade.get_current_case_name()
-    ensemble = rdb_api.add_ensemble(ensemble_name, reference=reference)
+    ensemble = rdb_api.add_ensemble(ensemble_name, reference=reference, priors=priors)
 
     for i in range(facade.get_ensemble_size()):
         rdb_api.add_realization(index=i, ensemble_name=ensemble.name)
@@ -176,8 +178,11 @@ def dump_to_new_storage(reference=None, rdb_connection=None, blob_connection=Non
 
 
     with rdb_api, blob_api:
-        ensemble = _create_ensemble(rdb_api, reference=reference)
+        priors = _extract_and_dump_priors(rdb_api=rdb_api) if reference is None else None
+        
+        ensemble = _create_ensemble(rdb_api, reference=reference, priors=priors)
         _extract_and_dump_observations(rdb_api=rdb_api, blob_api=blob_api)
+        
         _extract_and_dump_parameters(
             rdb_api=rdb_api, blob_api=blob_api, ensemble_name=ensemble.name
         )
@@ -201,3 +206,12 @@ def dump_to_new_storage(reference=None, rdb_connection=None, blob_connection=Non
 
 
     return ensemble_name
+
+def _extract_and_dump_priors(rdb_api):
+    facade = ERT.enkf_facade
+    gen_kw_priors = facade.gen_kw_priors()
+    return _dump_priors(priors=gen_kw_priors, rdb_api=rdb_api)
+    
+def _dump_priors(priors, rdb_api):
+    priors = [rdb_api.add_prior(key, priors) for key, priors in priors.items()]
+    return priors
