@@ -50,7 +50,9 @@ def populated_db(tmpdir):
     repository = RdbApi(connection)
     blob = BlobApi(connection)
 
-    ensemble = repository.add_ensemble(name="ensemble_name")
+    prior = repository.add_prior("group", [{"key1": "A", "key2": "B"}, {"key3": "C", "key4": "D"}])
+
+    ensemble = repository.add_ensemble(name="ensemble_name", prior=prior)
 
     realization = repository.add_realization(0, ensemble.name)
     realization2 = repository.add_realization(1, ensemble.name)

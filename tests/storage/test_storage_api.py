@@ -37,3 +37,11 @@ def test_realization(populated_db):
         schema = api.realization(ensemble_id=1, realization_idx=0, filter=None)
         print("############### REALIZATION ###############")
         pprint.pprint(schema)
+
+
+def test_priors(populated_db):
+    with StorageApi(rdb_url=populated_db, blob_url=populated_db) as api:
+        schema = api.ensemble_schema(1)
+        prior1 = schema["priors"][0]
+        assert prior1["group"] == "group"
+        assert prior1["data"] == [{"key1": "A", "key2": "B"}, {"key3": "C", "key4": "D"}]

@@ -246,6 +246,21 @@ class StorageApi(object):
                     "name": "<name>"
                 }
             ]
+            "priors": [
+                {
+                    "group": "<group>"
+                    "data": [
+                        {
+                            "key" : "<key>",
+                            "function" : "<function_type>"
+                            "parameters" : {
+                                "<name>" : "<value>"
+                            }
+                        }
+                    ]
+
+                }
+            ]
         }
 
         """
@@ -270,6 +285,13 @@ class StorageApi(object):
                         ensemble_id
                     )
                 ],
+                "priors": [
+                    {
+                        "group": prior_group.name,
+                        "data": prior_group.data
+                    }
+                    for prior_group in ens.priors
+                ] if ens.priors is not None else []
             })
 
         return return_schema
