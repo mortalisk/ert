@@ -4,7 +4,7 @@ from ert_shared.storage.blob_api import BlobApi
 from ert_shared.storage.rdb_api import RdbApi
 from ert_shared.storage.storage_api import StorageApi
 from ert_shared.storage import connections
-from flask import Response, request
+from flask import Response, request, stream_with_context
 
 
 def resolve_ensemble_uri(ensemble_ref):
@@ -35,6 +35,9 @@ def resolve_ref_uri(struct, ensemble_id=None):
                     struct["ref_url"] = "{}/parameters/{}".format(base, val)
                 elif type_name == "data":
                     struct["data_url"] = "{}data/{}".format(request.host_url, val)
+                elif type_name == "alldata":
+                    struct["alldata_url"] = \
+                        "{}datas/?ids={}".format(request.host_url, ",".join([str(id) for id in val]))
                 else:
                     continue
                 del struct[key]
@@ -86,6 +89,7 @@ class FlaskWrapper:
             self.set_observation_attributes,
             methods=["POST"],
         )
+        self.app.add_url_rule("/datas/", "datas", self.datas)
 
     def ensembles(self):
         with StorageApi(rdb_url=self._rdb_url, blob_url=self._blob_url) as api:
@@ -120,13 +124,30 @@ class FlaskWrapper:
             resolve_ref_uri(parameter, ensemble_id)
             return parameter
 
+    def get_data(self, ids):
+        def generator():
+            with StorageApi(
+                    rdb_url=self._rdb_url, blob_url=self._blob_url
+            ) as api:
+                first = True
+                for data in api.data(ids):
+                    if first:
+                        first = False
+                    else:
+                        yield "\n"
+                    if isinstance(data, list):
+                        yield ",".join([str(x) for x in data])
+                    else:
+                        yield str(data)
+        return Response(generator())
+
     def data(self, data_id):
-        with StorageApi(rdb_url=self._rdb_url, blob_url=self._blob_url) as api:
-            data = api.data(data_id)
-            if isinstance(data, list):
-                return ",".join([str(x) for x in data])
-            else:
-                return str(data)
+        return self.get_data([data_id])
+
+    def datas(self):
+        ids = request.args.get("ids")
+        print("DATAS: {}".format(",".join(ids)))
+        return self.get_data(ids)
 
     def get_observation(self, name):
         """Return an observation."""

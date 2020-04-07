@@ -246,9 +246,12 @@ class StorageApi(object):
                         observation.name
                     ] = misfits
 
+            allresposesref = [resp.values_ref for resp in responses]
+
             return_schema = {
                 "name": response_name,
                 "ensemble_id": ensemble_id,
+                "alldata_ref": allresposesref,
                 "realizations": [
                     {
                         "name": resp.realization.index,
@@ -279,8 +282,8 @@ class StorageApi(object):
 
     def data(self, id):
         with self._blob_api as blob_api:
-            return_data = blob_api.get_blob(id).data
-        return return_data
+            for response in blob_api.get_blob(id):
+                yield response.data
 
     def observation(self, name):
         """Return an observation or None if the observation was not found.

@@ -144,10 +144,21 @@ class StorageClient(object):
 
             response = ref_request(resp["ref_url"])
 
-            for real in response["realizations"]:
+            import time
 
-                data = pd.Series(data_request(real["data_url"]), name=real["name"])
-                df = df.append(data)
+            t0 = time.time()
+            print("start getting data")
+            df = pd.read_csv(response["alldata_url"], header=None)
+
+            # for real in response["realizations"]:
+            #
+            #     data = pd.Series(data_request(real["data_url"]), name=real["name"])
+            #     df = df.append(data)
+            t1 = time.time()
+
+            total = t1 - t0
+
+            print("done getting data used {}".format(total))
 
             indexes = axis_request(response["axis"]["data_url"])
             arrays = [[key] * len(indexes), indexes]
