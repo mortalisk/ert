@@ -145,7 +145,7 @@ class FlaskWrapper:
         return self.get_data([data_id])
 
     def datas(self):
-        ids = request.args.get("ids")
+        ids = request.args.get("ids").split(",")
         print("DATAS: {}".format(",".join(ids)))
         return self.get_data(ids)
 

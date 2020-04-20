@@ -486,6 +486,8 @@ class StorageApi(object):
                 parameter_def_id=parameter_def_id,
             )
 
+            return_schema["alldata_ref"] = [param.value_ref for param in bundle.parameters]
+
             return_schema["parameter_realizations"] = [
                 {
                     "name": param.realization.index,
