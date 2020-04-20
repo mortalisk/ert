@@ -282,7 +282,7 @@ class StorageApi(object):
 
     def data(self, id):
         with self._blob_api as blob_api:
-            for response in blob_api.get_blob(id):
+            for response in blob_api.get_blobs(id):
                 yield response.data
 
     def observation(self, name):

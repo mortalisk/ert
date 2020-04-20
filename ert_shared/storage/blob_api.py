@@ -44,8 +44,10 @@ class BlobApi:
         return data_frame
 
     def get_blob(self, id):
-        if not isinstance(id, list):
-            id = [id]
+        return self._session.query(ErtBlob).get(id)
 
-        return self._session.query(ErtBlob).filter(ErtBlob.id.in_(id)).yield_per(100).enable_eagerloads(False)
-        #return self._session.query(ErtBlob).get(id)
+    def get_blobs(self, ids):
+        if not isinstance(ids, list):
+            ids = [ids]
+
+        return self._session.query(ErtBlob).filter(ErtBlob.id.in_(ids)).yield_per(100).enable_eagerloads(False)
